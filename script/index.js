@@ -39,8 +39,8 @@
     PaperMarker.prototype.drawRectCur = function () {
         var _this = this;
         _this.ctx.save();
-        _this.ctx.strokeStyle = "#00c";
-        _this.ctx.lineWidth = 1;
+        _this.ctx.strokeStyle = "blue";
+        _this.ctx.lineWidth = 2;
         _this.ctx.strokeRect(_this.rect.x, _this.rect.y, -_this.rect.width, -_this.rect.height);
         _this.ctx.restore();
     };
@@ -51,8 +51,8 @@
         _this.drawImage(_this.img);
 
         _this.ctx.save();
-        _this.ctx.strokeStyle = "#c00";
-        _this.ctx.lineWidth = 1;
+        _this.ctx.strokeStyle = "red";
+        _this.ctx.lineWidth = 2;
         _this.marks.forEach(function (item) {
             _this.ctx.strokeRect(item.x, item.y, -item.width, -item.height);
 
@@ -132,7 +132,7 @@
         _this.canvas.onmousedown = mouseDownHandler;
         _this.canvas.onmouseup = mouseUpHandler;
     };
-    
+
     PaperMarker.prototype.init = function () {
         var _this = this;
         _this.getImage(function () {
