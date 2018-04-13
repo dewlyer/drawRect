@@ -19,7 +19,7 @@
 </head>
 <body>
 
-    <div id="canvasWrap" class="canvas-wrap" data-img="./bg.jpg">
+    <div id="canvasWrap" class="canvas-wrap" data-img="./images/bg.jpg">
         <canvas class="canvas" id="canvas" width="300" height="300">
             当前浏览器不支持canvas
         </canvas>
@@ -53,7 +53,7 @@
                 origin.y = e.y + window.scrollY;
                 canvas.onmousemove = function (e) {
                     setRect(e);
-                    drawAllRect(true);
+                    drawAllRect();
                     drawCurRect();
                 };
 
@@ -83,30 +83,56 @@
                     width: rect.width,
                     height: rect.height
                 });
+//                console.clear();
+//                console.log(list);
             }
         }
 
-        function drawAllRect(drawing) {
+        function drawAllRect() {
             clearCanvas();
             drawImage(img);
-            ctx.strokeStyle = "#0c0";
+
+            ctx.save();
+            ctx.strokeStyle = "#c00";
+            ctx.lineWidth = 1;
             list.forEach(function (item) {
-                ctx.rect(item.x, item.y, -item.width, -item.height);
-                ctx.stroke();
+//                ctx.rect(item.x, item.y, -item.width, -item.height);
+//                ctx.stroke();
+                ctx.strokeRect(item.x, item.y, -item.width, -item.height);
+
+                var coordinate = {
+                    x: function () {
+                        return item.width>=0 ? item.x-item.width : item.x;
+                    },
+                    y: function () {
+                        return item.height>=0 ? item.y-item.height : item.y;
+                    },
+                    text: function () {
+                        return 'X:' + this.x().toString() + ' - Y:' + this.y().toString();
+                    }
+                };
+                ctx.font="12px Arial";
+                ctx.fillStyle = 'red';
+                ctx.fillText(coordinate.text(), coordinate.x(), coordinate.y() - 2);
+                console.log(coordinate)
             });
+            ctx.restore();
         }
 
         function drawCurRect() {
-            ctx.strokeStyle = "#c00";
-            ctx.rect(rect.x, rect.y, -rect.width, -rect.height);
-            ctx.stroke();
+            ctx.save();
+            ctx.strokeStyle = "#00c";
+            ctx.lineWidth = 1;
+//            ctx.rect(rect.x, rect.y, -rect.width, -rect.height);
+//            ctx.stroke();
+            ctx.strokeRect(rect.x, rect.y, -rect.width, -rect.height);
+            ctx.restore();
         }
         
         function drawImage(image) {
             canvas.width = image.naturalWidth || image.width;
             canvas.height = image.naturalHeight || image.height;
             ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-            ctx.save();
         }
 
         window.onload = function () {
