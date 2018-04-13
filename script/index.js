@@ -13,33 +13,22 @@
         };
     };
 
-    PaperMarker.prototype.getImage = function (callback) {
-        var _this = this;
-        _this.img = new Image();
-        _this.img.src = _this.imgUrl;
-        _this.img.onload = function () {
-            if(typeof callback === 'function') {
-                callback();
-            }
-        };
-    };
-
-    PaperMarker.prototype.initEvent = function initEvent() {
+    PaperMarker.prototype.bindEvent = function bindEvent() {
         var _this = this;
         _this.canvas.onmousedown = function (e) {
             _this.origin.x = e.x + window.scrollX;
             _this.origin.y = e.y + window.scrollY;
             _this.canvas.onmousemove = function (e) {
                 _this.setRect(e);
-                _this.drawAllRect();
-                _this.drawCurRect();
+                _this.drawRectAll();
+                _this.drawRectCur();
             };
 
         };
 
         _this.canvas.onmouseup = function (e) {
             _this.setRect(e, true);
-            _this.drawAllRect();
+            _this.drawRectAll();
             _this.canvas.onmousemove = null;
         };
 
@@ -63,7 +52,16 @@
         }
     };
 
-    PaperMarker.prototype.drawAllRect = function drawAllRect() {
+    PaperMarker.prototype.drawRectCur = function () {
+        var _this = this;
+        _this.ctx.save();
+        _this.ctx.strokeStyle = "#00c";
+        _this.ctx.lineWidth = 1;
+        _this.ctx.strokeRect(_this.rect.x, _this.rect.y, -_this.rect.width, -_this.rect.height);
+        _this.ctx.restore();
+    };
+
+    PaperMarker.prototype.drawRectAll = function () {
         var _this = this;
         _this.clearCanvas();
         _this.drawImage(_this.img);
@@ -72,8 +70,6 @@
         _this.ctx.strokeStyle = "#c00";
         _this.ctx.lineWidth = 1;
         _this.marks.forEach(function (item) {
-//                ctx.rect(item.x, item.y, -item.width, -item.height);
-//                ctx.stroke();
             _this.ctx.strokeRect(item.x, item.y, -item.width, -item.height);
 
             var coordinate = {
@@ -95,18 +91,18 @@
         _this.ctx.restore();
     };
 
-    PaperMarker.prototype.drawCurRect = function drawCurRect() {
+    PaperMarker.prototype.getImage = function (callback) {
         var _this = this;
-        _this.ctx.save();
-        _this.ctx.strokeStyle = "#00c";
-        _this.ctx.lineWidth = 1;
-//            ctx.rect(rect.x, rect.y, -rect.width, -rect.height);
-//            ctx.stroke();
-        _this.ctx.strokeRect(_this.rect.x, _this.rect.y, -_this.rect.width, -_this.rect.height);
-        _this.ctx.restore();
+        _this.img = new Image();
+        _this.img.src = _this.imgUrl;
+        _this.img.onload = function () {
+            if(typeof callback === 'function') {
+                callback();
+            }
+        };
     };
 
-    PaperMarker.prototype.drawImage = function drawImage(image) {
+    PaperMarker.prototype.drawImage = function (image) {
         var _this = this;
         _this.canvas.width = image.naturalWidth || image.width;
         _this.canvas.height = image.naturalHeight || image.height;
@@ -134,7 +130,7 @@
         var _this = this;
         _this.getImage(function () {
             _this.drawImage(_this.img);
-            _this.initEvent();
+            _this.bindEvent();
         });
     };
 
