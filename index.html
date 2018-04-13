@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+        .canvas-wrap {
+
+        }
+        .canvas {
+
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvasWrap" class="canvas-wrap" data-img="./bg.jpg">
+        <canvas class="canvas" id="canvas" width="300" height="300">
+            当前浏览器不支持canvas
+        </canvas>
+    </div>
+
+    <script>
+        var list = [];
+        var rect = {};
+        var canvas = null;
+        var ctx = null;
+        var origin = { x: 0, y: 0 };
+        var img = new Image();
+
+        function getImgUrl() {
+            var imgUrl = document.getElementById('canvasWrap').getAttribute('data-img');
+            return imgUrl;
+        }
+        
+        function initCanvas() {
+            img.src = getImgUrl();
+            img.onload = function () {
+                drawImage(img);
+                initEvent();
+            };
+        }
+        
+        function initEvent() {
+
+            canvas.onmousedown = function (e) {
+                origin.x = e.x + window.scrollX;
+                origin.y = e.y + window.scrollY;
+                canvas.onmousemove = function (e) {
+                    setRect(e);
+                    drawAllRect(true);
+                    drawCurRect();
+                };
+
+            };
+
+            canvas.onmouseup = function (e) {
+                setRect(e, true);
+                drawAllRect();
+                canvas.onmousemove = null;
+            };
+            
+        }
+        
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function setRect(event, add) {
+            rect.x = event.clientX + window.scrollX;
+            rect.y = event.clientY + window.scrollY;
+            rect.width = rect.x- origin.x;
+            rect.height = rect.y - origin.y;
+            if(add === true) {
+                list.push({
+                    x: rect.x,
+                    y: rect.y,
+                    width: rect.width,
+                    height: rect.height
+                });
+            }
+        }
+
+        function drawAllRect(drawing) {
+            clearCanvas();
+            drawImage(img);
+            ctx.strokeStyle = "#0c0";
+            list.forEach(function (item) {
+                ctx.rect(item.x, item.y, -item.width, -item.height);
+                ctx.stroke();
+            });
+        }
+
+        function drawCurRect() {
+            ctx.strokeStyle = "#c00";
+            ctx.rect(rect.x, rect.y, -rect.width, -rect.height);
+            ctx.stroke();
+        }
+        
+        function drawImage(image) {
+            canvas.width = image.naturalWidth || image.width;
+            canvas.height = image.naturalHeight || image.height;
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            ctx.save();
+        }
+
+        window.onload = function () {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+
+            initCanvas();
+        }
+    </script>
+</body>
+</html>
