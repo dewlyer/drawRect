@@ -1,4 +1,5 @@
 (function (window, document) {
+    'use strict';
 
     var PaperMarker = function (canvas, imgUrl) {
         this.canvas = canvas;
