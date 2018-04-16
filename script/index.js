@@ -173,7 +173,7 @@
         _this.ctx.strokeStyle = _this.pen.normal.color;
         _this.ctx.lineWidth = _this.pen.normal.width;
         _this.marks.forEach(function (item, index) {
-            if(selected && (_this.marks.length-1)===index) {
+            if(selected && (_this.marks.length-1) === index) {
                 _this.ctx.strokeStyle = _this.pen.select.color;
                 _this.ctx.lineWidth = _this.pen.select.width;
             }
@@ -193,7 +193,12 @@
                 return item.height>=0 ? item.y-item.height : item.y;
             },
             text: function () {
-                return 'X:' + this.x().toString() + ' - Y:' + this.y().toString() + ' - Z:' + index;
+                var str = 'X:' + this.x().toString() + ' - Y:' + this.y().toString() + ' - Z:' + index;
+                str += ' - x:' + item.x;
+                str += ' - y:' + item.y;
+                str += ' - width:' + item.width;
+                str += ' - height:' + item.height;
+                return str;
             }
         };
         _this.ctx.save();
