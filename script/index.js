@@ -27,16 +27,25 @@
         };
     };
 
+
+
+    PaperMarker.prototype.getPosition = function (event) {
+        return {
+            x: event.x + window.scrollX,
+            y: event.y + window.scrollY
+        };
+    };
+
     PaperMarker.prototype.getOrigin = function (event) {
         var _this = this;
-        _this.origin.x = event.x + window.scrollX;
-        _this.origin.y = event.y + window.scrollY;
+        _this.origin = _this.getPosition(event);
     };
 
     PaperMarker.prototype.getRect = function (event) {
         var _this = this;
-        _this.rect.x = event.clientX + window.scrollX;
-        _this.rect.y = event.clientY + window.scrollY;
+        var position = _this.getPosition(event);
+        _this.rect.x = position.x;
+        _this.rect.y = position.y;
         _this.rect.z = _this.marks.length;
         _this.rect.width = _this.rect.x - _this.origin.x;
         _this.rect.height = _this.rect.y - _this.origin.y;
@@ -164,11 +173,15 @@
                     _this.drawImage();
                     _this.drawRectAll();
                     _this.canvas.onmousemove = null;
+                },
+                click: function (e) {
+                    console.log(e);
                 }
             };
 
         _this.canvas.onmousedown = handler.mousedown;
         _this.canvas.onmouseup = handler.mouseup;
+        _this.canvas.onclick = handler.click;
     };
 
     PaperMarker.prototype.init = function () {
