@@ -68,7 +68,6 @@
         _this.marks.forEach(function (item) {
             _this.drawCoordinate(item);
             _this.ctx.strokeRect(item.x, item.y, -item.width, -item.height);
-            // console.log(coordinate)
         });
         _this.ctx.restore();
     };
@@ -86,7 +85,6 @@
                 return 'X:' + this.x().toString() + ' - Y:' + this.y().toString();
             }
         };
-
         _this.ctx.save();
         _this.ctx.font = _this.pen.coordinate.font;
         _this.ctx.fillStyle = _this.pen.coordinate.color;
