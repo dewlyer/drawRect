@@ -5,6 +5,7 @@
       <w>mousemove</w>
       <w>mouseup</w>
       <w>onload</w>
+      <w>zindex</w>
     </words>
   </dictionary>
 </component>

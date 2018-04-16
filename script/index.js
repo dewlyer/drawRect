@@ -37,6 +37,7 @@
         var _this = this;
         _this.rect.x = event.clientX + window.scrollX;
         _this.rect.y = event.clientY + window.scrollY;
+        _this.rect.z = _this.marks.length;
         _this.rect.width = _this.rect.x - _this.origin.x;
         _this.rect.height = _this.rect.y - _this.origin.y;
     };
@@ -46,6 +47,7 @@
         _this.marks.push({
             x: _this.rect.x,
             y: _this.rect.y,
+            z: _this.rect.z,
             width: _this.rect.width,
             height: _this.rect.height
         });
@@ -82,7 +84,7 @@
                 return item.height>=0 ? item.y-item.height : item.y;
             },
             text: function () {
-                return 'X:' + this.x().toString() + ' - Y:' + this.y().toString();
+                return 'X:' + this.x().toString() + ' - Y:' + this.y().toString() + ' - Z:' + item.z;
             }
         };
         _this.ctx.save();
