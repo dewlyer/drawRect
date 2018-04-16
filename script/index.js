@@ -10,6 +10,20 @@
         this.origin = {
             x: 0, y: 0
         };
+        this.pen = {
+            normal: {
+                color: 'red',
+                width: 1
+            },
+            active: {
+                color: 'blue',
+                width: 1
+            },
+            coordinate: {
+                color: 'red',
+                font: '12px Arial'
+            }
+        };
     };
 
     PaperMarker.prototype.getOrigin = function (event) {
@@ -39,8 +53,8 @@
     PaperMarker.prototype.drawRectCur = function () {
         var _this = this;
         _this.ctx.save();
-        _this.ctx.strokeStyle = "blue";
-        _this.ctx.lineWidth = 2;
+        _this.ctx.strokeStyle = _this.pen.active.color;
+        _this.ctx.lineWidth = _this.pen.active.width;
         _this.ctx.strokeRect(_this.rect.x, _this.rect.y, -_this.rect.width, -_this.rect.height);
         _this.ctx.restore();
     };
@@ -51,8 +65,8 @@
         _this.drawImage(_this.img);
 
         _this.ctx.save();
-        _this.ctx.strokeStyle = "red";
-        _this.ctx.lineWidth = 2;
+        _this.ctx.strokeStyle = _this.pen.normal.color;
+        _this.ctx.lineWidth = _this.pen.normal.width;
         _this.marks.forEach(function (item) {
             _this.ctx.strokeRect(item.x, item.y, -item.width, -item.height);
 
@@ -67,8 +81,8 @@
                     return 'X:' + this.x().toString() + ' - Y:' + this.y().toString();
                 }
             };
-            _this.ctx.font="12px Arial";
-            _this.ctx.fillStyle = 'red';
+            _this.ctx.font = _this.pen.coordinate.font;
+            _this.ctx.fillStyle = _this.pen.coordinate.color;
             _this.ctx.fillText(coordinate.text(), coordinate.x(), coordinate.y() - 2);
             // console.log(coordinate)
         });
@@ -142,17 +156,14 @@
     };
 
     window.onload = function () {
+        var canvas = document.getElementById('canvas'),
+            imgUrl = document.getElementById('canvasWrap').getAttribute('data-img'),
+            paperMarker = new PaperMarker(canvas, imgUrl);
 
-        var canvas = document.getElementById('canvas');
-        var imgUrl = document.getElementById('canvasWrap').getAttribute('data-img');
-
-        var paperMarker = new PaperMarker(canvas, imgUrl);
         paperMarker.init();
-
         document.getElementById('clearCanvas').onclick = function () {
             paperMarker.clear();
         };
-
     };
 
 })(window, document);
