@@ -13,15 +13,18 @@
         };
         this.pen = {
             normal: {
-                color: 'red',
-                width: 1
-            },
-            active: {
                 color: 'blue',
                 width: 1
             },
-            coordinate: {
+            active: {
+                color: 'green',
+                width: 1
+            },
+            select: {
                 color: 'red',
+                width: 1
+            },
+            coordinate: {
                 font: '12px Arial'
             }
         };
@@ -41,12 +44,24 @@
         _this.origin = _this.getPosition(event);
     };
 
+    PaperMarker.prototype.getSelectOrigin = function (index) {
+        var _this = this;
+        var selectItem = _this.marks[index];
+        _this.slelectOrigin = _this.getPosition(event);
+        _this.slelectRect = {
+            width: selectItem.width,
+            height: selectItem.height,
+            x: selectItem.x,
+            y: selectItem.y
+        };
+    };
+
     PaperMarker.prototype.getRect = function (event) {
         var _this = this;
         var position = _this.getPosition(event);
         _this.rect.x = position.x;
         _this.rect.y = position.y;
-        _this.rect.z = _this.marks.length;
+        // _this.rect.z = _this.marks.length;
         _this.rect.width = _this.rect.x - _this.origin.x;
         _this.rect.height = _this.rect.y - _this.origin.y;
     };
@@ -56,10 +71,91 @@
         _this.marks.push({
             x: _this.rect.x,
             y: _this.rect.y,
-            z: _this.rect.z,
+            // z: _this.rect.z,
             width: _this.rect.width,
             height: _this.rect.height
         });
+    };
+
+    PaperMarker.prototype.setRectOffset = function (event) {
+        var _this = this;
+        var lastItemIndex = _this.marks.length - 1;
+        var position = _this.getPosition(event);
+        var offsetX = position.x - _this.slelectOrigin.x;
+        var offsetY = position.y - _this.slelectOrigin.y;
+        _this.marks[lastItemIndex].x = _this.slelectRect.x + offsetX;
+        _this.marks[lastItemIndex].y = _this.slelectRect.y + offsetY;
+    };
+
+    PaperMarker.prototype.setRectSize = function (event, direction) {
+        var _this = this;
+        var lastItemIndex = _this.marks.length - 1;
+        var position = _this.getPosition(event);
+        var offsetW = 0;
+        var offsetH = 0;
+
+        if(direction === 'left') {
+            offsetW = position.x - _this.slelectOrigin.x;
+            _this.marks[lastItemIndex].width = _this.slelectRect.width - offsetW;
+        }
+        else if(direction === 'right') {
+            offsetW = position.x - _this.slelectOrigin.x;
+            _this.marks[lastItemIndex].width = _this.slelectRect.width + offsetW;
+        }
+        else if(direction === 'top') {
+            offsetH = position.y - _this.slelectOrigin.y;
+            _this.marks[lastItemIndex].height = _this.slelectRect.height - offsetH;
+        }
+        else if(direction === 'bottom') {
+            offsetH = position.y - _this.slelectOrigin.y;
+            _this.marks[lastItemIndex].height = _this.slelectRect.height + offsetH;
+        }
+    };
+
+    PaperMarker.prototype.selectRect = function (index) {
+        var _this = this;
+        var selectedRect = _this.marks[index];
+        _this.marks.splice(index, 1);
+        _this.marks.push(selectedRect);
+    };
+
+    PaperMarker.prototype.getMouseAction = function (event) {
+        var _this = this;
+        var action = { name: 'append', index: 0 };
+        var position = _this.getPosition(event);
+        var scaleWidth = 30;
+        if(_this.marks.length > 0) {
+            _this.marks.forEach(function (item, index) {
+                var x1 = item.x,
+                    x2 = item.x - item.width,
+                    y1 = item.y,
+                    y2 = item.y - item.height;
+
+                if(position.x <= x1 && position.x >= x2) {
+                    if(position.y <= y1 && position.y >= y2) {
+
+                        action.index = index;
+                        action.name = 'scale';
+                        if(position.x >= x1 - scaleWidth) {
+                            action.direction = 'right';
+                        }
+                        else if(position.x <= x2 + scaleWidth) {
+                            action.direction = 'left';
+                        }
+                        else if(position.y >= y1 - scaleWidth) {
+                            action.direction = 'bottom';
+                        }
+                        else if(position.y <= y2 + scaleWidth) {
+                            action.direction = 'top';
+                        }
+                        else {
+                            action.name = 'move';
+                        }
+                    }
+                }
+            });
+        }
+        return action;
     };
 
     PaperMarker.prototype.drawRectCur = function () {
@@ -71,19 +167,23 @@
         _this.ctx.restore();
     };
 
-    PaperMarker.prototype.drawRectAll = function () {
+    PaperMarker.prototype.drawRectAll = function (selected) {
         var _this = this;
         _this.ctx.save();
         _this.ctx.strokeStyle = _this.pen.normal.color;
         _this.ctx.lineWidth = _this.pen.normal.width;
-        _this.marks.forEach(function (item) {
-            _this.drawCoordinate(item);
+        _this.marks.forEach(function (item, index) {
+            if(selected && (_this.marks.length-1)===index) {
+                _this.ctx.strokeStyle = _this.pen.select.color;
+                _this.ctx.lineWidth = _this.pen.select.width;
+            }
+            _this.drawCoordinate(item, index, selected);
             _this.ctx.strokeRect(item.x, item.y, -item.width, -item.height);
         });
         _this.ctx.restore();
     };
 
-    PaperMarker.prototype.drawCoordinate = function (item) {
+    PaperMarker.prototype.drawCoordinate = function (item, index, selected) {
         var _this = this;
         var coordinate = {
             x: function () {
@@ -93,12 +193,17 @@
                 return item.height>=0 ? item.y-item.height : item.y;
             },
             text: function () {
-                return 'X:' + this.x().toString() + ' - Y:' + this.y().toString() + ' - Z:' + item.z;
+                return 'X:' + this.x().toString() + ' - Y:' + this.y().toString() + ' - Z:' + index;
             }
         };
         _this.ctx.save();
+        if(selected && (_this.marks.length-1)===index) {
+            _this.ctx.fillStyle = _this.pen.select.color;
+        }
+        else {
+            _this.ctx.fillStyle = _this.pen.normal.color;
+        }
         _this.ctx.font = _this.pen.coordinate.font;
-        _this.ctx.fillStyle = _this.pen.coordinate.color;
         _this.ctx.fillText(coordinate.text(), coordinate.x(), coordinate.y() - 2);
         _this.ctx.restore();
     };
@@ -155,33 +260,105 @@
     PaperMarker.prototype.handleEvent = function () {
         var _this = this,
             handler = {
-                mousemove: function (e) {
+                mouseDown: function (e) {
+                    var action = _this.getMouseAction(e);
+                    if(action.name === 'move') {
+                        _this.getSelectOrigin(action.index);
+                        _this.selectRect(action.index);
+                        _this.clearCanvas();
+                        _this.drawImage();
+                        _this.drawRectAll(true);
+                        _this.canvas.onmousemove = handler.selectMove;
+                        _this.canvas.onmouseup = handler.selectUp;
+                    }
+                    else if(action.name === 'scale') {
+                        _this.getSelectOrigin(action.index);
+                        switch (action.direction) {
+                            case 'left':
+                                _this.canvas.onmousemove = handler.scaleMoveLeft;
+                                break;
+                            case 'right':
+                                _this.canvas.onmousemove = handler.scaleMoveRight;
+                                break;
+                            case 'top':
+                                _this.canvas.onmousemove = handler.scaleMoveTop;
+                                break;
+                            case 'bottom':
+                                _this.canvas.onmousemove = handler.scaleMoveBottom;
+                                break;
+                        }
+                        _this.canvas.onmouseup = handler.scaleUp;
+                    }
+                    else if(action.name === 'append') {
+                        _this.getOrigin(e);
+                        _this.canvas.onmousemove = handler.mouseMove;
+                        _this.canvas.onmouseup = handler.mouseUp;
+                    }
+                },
+                mouseMove: function (e) {
                     _this.getRect(e);
                     _this.clearCanvas();
                     _this.drawImage();
                     _this.drawRectAll();
                     _this.drawRectCur();
                 },
-                mousedown: function (e) {
-                    _this.getOrigin(e);
-                    _this.canvas.onmousemove = handler.mousemove;
-                },
-                mouseup: function (e) {
+                mouseUp: function (e) {
                     _this.getRect(e);
                     _this.setRect();
                     _this.clearCanvas();
                     _this.drawImage();
                     _this.drawRectAll();
                     _this.canvas.onmousemove = null;
+                    _this.canvas.onmouseup = null;
                 },
-                click: function (e) {
-                    console.log(e);
+                selectMove: function (e) {
+                    _this.setRectOffset(e);
+                    _this.clearCanvas();
+                    _this.drawImage();
+                    _this.drawRectAll(true);
+                },
+                selectUp: function (e) {
+                    _this.setRectOffset(e);
+                    _this.clearCanvas();
+                    _this.drawImage();
+                    _this.drawRectAll(true);
+                    _this.canvas.onmousemove = null;
+                    _this.canvas.onmouseup = null;
+                },
+                scaleMoveTop: function (e) {
+                    _this.setRectSize(e, 'top');
+                    _this.clearCanvas();
+                    _this.drawImage();
+                    _this.drawRectAll(true);
+                },
+                scaleMoveBottom: function (e) {
+                    _this.setRectSize(e, 'bottom');
+                    _this.clearCanvas();
+                    _this.drawImage();
+                    _this.drawRectAll(true);
+                },
+                scaleMoveLeft: function (e) {
+                    _this.setRectSize(e, 'left');
+                    _this.clearCanvas();
+                    _this.drawImage();
+                    _this.drawRectAll(true);
+                },
+                scaleMoveRight: function (e) {
+                    _this.setRectSize(e, 'right');
+                    _this.clearCanvas();
+                    _this.drawImage();
+                    _this.drawRectAll(true);
+                },
+                scaleUp: function (e) {
+                    _this.clearCanvas();
+                    _this.drawImage();
+                    _this.drawRectAll();
+                    _this.canvas.onmousemove = null;
+                    _this.canvas.onmouseup = null;
                 }
             };
 
-        _this.canvas.onmousedown = handler.mousedown;
-        _this.canvas.onmouseup = handler.mouseup;
-        _this.canvas.onclick = handler.click;
+        _this.canvas.onmousedown = handler.mouseDown;
     };
 
     PaperMarker.prototype.init = function () {
