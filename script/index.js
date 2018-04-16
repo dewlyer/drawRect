@@ -61,31 +61,35 @@
 
     PaperMarker.prototype.drawRectAll = function () {
         var _this = this;
-        _this.clearCanvas();
-        _this.drawImage(_this.img);
-
         _this.ctx.save();
         _this.ctx.strokeStyle = _this.pen.normal.color;
         _this.ctx.lineWidth = _this.pen.normal.width;
         _this.marks.forEach(function (item) {
+            _this.drawCoordinate(item);
             _this.ctx.strokeRect(item.x, item.y, -item.width, -item.height);
-
-            var coordinate = {
-                x: function () {
-                    return item.width>=0 ? item.x-item.width : item.x;
-                },
-                y: function () {
-                    return item.height>=0 ? item.y-item.height : item.y;
-                },
-                text: function () {
-                    return 'X:' + this.x().toString() + ' - Y:' + this.y().toString();
-                }
-            };
-            _this.ctx.font = _this.pen.coordinate.font;
-            _this.ctx.fillStyle = _this.pen.coordinate.color;
-            _this.ctx.fillText(coordinate.text(), coordinate.x(), coordinate.y() - 2);
             // console.log(coordinate)
         });
+        _this.ctx.restore();
+    };
+
+    PaperMarker.prototype.drawCoordinate = function (item) {
+        var _this = this;
+        var coordinate = {
+            x: function () {
+                return item.width>=0 ? item.x-item.width : item.x;
+            },
+            y: function () {
+                return item.height>=0 ? item.y-item.height : item.y;
+            },
+            text: function () {
+                return 'X:' + this.x().toString() + ' - Y:' + this.y().toString();
+            }
+        };
+
+        _this.ctx.save();
+        _this.ctx.font = _this.pen.coordinate.font;
+        _this.ctx.fillStyle = _this.pen.coordinate.color;
+        _this.ctx.fillText(coordinate.text(), coordinate.x(), coordinate.y() - 2);
         _this.ctx.restore();
     };
 
@@ -100,11 +104,25 @@
         };
     };
 
-    PaperMarker.prototype.drawImage = function (image) {
+    PaperMarker.prototype.drawImage = function (callback) {
         var _this = this;
-        _this.canvas.width = image.naturalWidth || image.width;
-        _this.canvas.height = image.naturalHeight || image.height;
-        _this.ctx.drawImage(image, 0, 0, _this.canvas.width, _this.canvas.height);
+        var render = function () {
+            _this.canvas.width = _this.img.naturalWidth || _this.img.width;
+            _this.canvas.height = _this.img.naturalHeight || _this.img.height;
+            _this.ctx.drawImage(_this.img, 0, 0, _this.canvas.width, _this.canvas.height);
+        };
+
+        if(_this.img === null) {
+            _this.getImage(function () {
+                render();
+                if(typeof callback === 'function') {
+                    callback();
+                }
+            });
+        }
+        else {
+            render();
+        }
     };
 
     PaperMarker.prototype.clearCanvas = function () {
@@ -121,36 +139,40 @@
         var _this = this;
         _this.clearMarks();
         _this.clearCanvas();
-        _this.drawImage(_this.img);
+        _this.drawImage();
     };
 
     PaperMarker.prototype.handleEvent = function () {
-        var _this = this;
+        var _this = this,
+            handler = {
+                mousemove: function (e) {
+                    _this.getRect(e);
+                    _this.clearCanvas();
+                    _this.drawImage();
+                    _this.drawRectAll();
+                    _this.drawRectCur();
+                },
+                mousedown: function (e) {
+                    _this.getOrigin(e);
+                    _this.canvas.onmousemove = handler.mousemove;
+                },
+                mouseup: function (e) {
+                    _this.getRect(e);
+                    _this.setRect();
+                    _this.clearCanvas();
+                    _this.drawImage();
+                    _this.drawRectAll();
+                    _this.canvas.onmousemove = null;
+                }
+            };
 
-        var mouseMoveHandler = function (e) {
-            _this.getRect(e);
-            _this.drawRectAll();
-            _this.drawRectCur();
-        };
-        var mouseDownHandler = function (e) {
-            _this.getOrigin(e);
-            _this.canvas.onmousemove = mouseMoveHandler;
-        };
-        var mouseUpHandler = function (e) {
-            _this.getRect(e);
-            _this.setRect();
-            _this.drawRectAll();
-            _this.canvas.onmousemove = null;
-        };
-
-        _this.canvas.onmousedown = mouseDownHandler;
-        _this.canvas.onmouseup = mouseUpHandler;
+        _this.canvas.onmousedown = handler.mousedown;
+        _this.canvas.onmouseup = handler.mouseup;
     };
 
     PaperMarker.prototype.init = function () {
         var _this = this;
-        _this.getImage(function () {
-            _this.drawImage(_this.img);
+        _this.drawImage(function () {
             _this.handleEvent();
         });
     };
