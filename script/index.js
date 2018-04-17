@@ -111,18 +111,26 @@
         var offsetH = point.y - _this.slelectOrigin.y;
 
         if(direction === 'left') {
-            _this.marks[lastItemIndex].width = _this.slelectRect.width - offsetW;
-            _this.marks[lastItemIndex].x = _this.slelectRect.x + offsetW;
+            if(offsetW <= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandlerWidth) {
+                _this.marks[lastItemIndex].x = _this.slelectRect.x + offsetW;
+                _this.marks[lastItemIndex].width = _this.slelectRect.width - offsetW;
+            }
         }
         else if(direction === 'right') {
-            _this.marks[lastItemIndex].width = _this.slelectRect.width + offsetW;
+            if(offsetW >= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandlerWidth) {
+                _this.marks[lastItemIndex].width = _this.slelectRect.width + offsetW;
+            }
         }
         else if(direction === 'top') {
-            _this.marks[lastItemIndex].height = _this.slelectRect.height - offsetH;
-            _this.marks[lastItemIndex].y = _this.slelectRect.y + offsetH;
+            if(offsetH <= 0 || _this.marks[lastItemIndex].height > 2*_this.scaleHandlerWidth) {
+                _this.marks[lastItemIndex].y = _this.slelectRect.y + offsetH;
+                _this.marks[lastItemIndex].height = _this.slelectRect.height - offsetH;
+            }
         }
         else if(direction === 'bottom') {
-            _this.marks[lastItemIndex].height = _this.slelectRect.height + offsetH;
+            if(offsetH >= 0 || _this.marks[lastItemIndex].height >= 2*_this.scaleHandlerWidth) {
+                _this.marks[lastItemIndex].height = _this.slelectRect.height + offsetH;
+            }
         }
     };
 
