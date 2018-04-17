@@ -240,12 +240,14 @@
         _this.ctx.strokeStyle = _this.pen.normal.color;
         _this.ctx.lineWidth = _this.pen.normal.width;
         _this.marks.forEach(function (item, index) {
+            _this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            _this.ctx.fillRect(item.x, item.y, item.width, item.height);
             if(selected && (_this.marks.length-1) === index) {
                 _this.ctx.strokeStyle = _this.pen.select.color;
                 _this.ctx.lineWidth = _this.pen.select.width;
             }
-            _this.drawCoordinate(item, index, selected);
             _this.ctx.strokeRect(item.x, item.y, item.width, item.height);
+            _this.drawCoordinate(item, index, selected);
         });
         _this.ctx.restore();
     };
@@ -253,14 +255,14 @@
     PaperMarker.prototype.drawCoordinate = function (item, index, selected) {
         var _this = this;
         var verOffset = 4;
-        var horOffset = 2;
+        var horOffset = 4;
         var str = 'X:' + item.x + ' - Y:' + item.y + ' - Z:' + index +
             ' - Width:' + item.width + ' - Height:' + item.height;
 
         _this.ctx.save();
         _this.ctx.font = _this.pen.coordinate.font;
-        _this.ctx.fillStyle = 'white';
-        _this.ctx.fillRect(item.x, item.y, _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.pen.coordinate.font) + verOffset));
+        _this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        _this.ctx.fillRect(item.x-1, item.y-1, _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.pen.coordinate.font) + verOffset));
         _this.ctx.fillStyle = (selected && (_this.marks.length-1)===index) ? _this.pen.select.color : _this.pen.normal.color;
         _this.ctx.fillText(str, item.x, item.y - verOffset);
         _this.ctx.restore();
