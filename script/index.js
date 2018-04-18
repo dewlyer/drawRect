@@ -28,7 +28,15 @@
                 font: '14px Arial'
             }
         };
-        this.scaleHandlerWidth = 5;
+        this.bucket = {
+            normal: {
+                color: 'rgba(0, 0, 0, 0.1)'
+            },
+            coordinate: {
+                color: 'rgba(255, 255, 255, 0.7)'
+            }
+        };
+        this.scaleHandSize = 5;
     };
 
 
@@ -111,24 +119,24 @@
         var offsetH = point.y - _this.slelectOrigin.y;
 
         if(direction === 'left') {
-            if(offsetW <= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandlerWidth) {
+            if(offsetW <= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandSize) {
                 _this.marks[lastItemIndex].x = _this.slelectRect.x + offsetW;
                 _this.marks[lastItemIndex].width = _this.slelectRect.width - offsetW;
             }
         }
         else if(direction === 'right') {
-            if(offsetW >= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandlerWidth) {
+            if(offsetW >= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandSize) {
                 _this.marks[lastItemIndex].width = _this.slelectRect.width + offsetW;
             }
         }
         else if(direction === 'top') {
-            if(offsetH <= 0 || _this.marks[lastItemIndex].height > 2*_this.scaleHandlerWidth) {
+            if(offsetH <= 0 || _this.marks[lastItemIndex].height > 2*_this.scaleHandSize) {
                 _this.marks[lastItemIndex].y = _this.slelectRect.y + offsetH;
                 _this.marks[lastItemIndex].height = _this.slelectRect.height - offsetH;
             }
         }
         else if(direction === 'bottom') {
-            if(offsetH >= 0 || _this.marks[lastItemIndex].height >= 2*_this.scaleHandlerWidth) {
+            if(offsetH >= 0 || _this.marks[lastItemIndex].height >= 2*_this.scaleHandSize) {
                 _this.marks[lastItemIndex].height = _this.slelectRect.height + offsetH;
             }
         }
@@ -148,32 +156,24 @@
         var point = _this.getPosition(event);
         var style =  'cursor: move;';
         var item = _this.marks[_this.marks.length - 1];
-        var x1, x2, y1, y2;
-        x1 = item.x;
-        y1 = item.y;
-        x2 = item.x + item.width;
-        y2 = item.y + item.height;
+        var x1 = item.x, x2 = item.x + item.width,
+            y1 = item.y, y2 = item.y + item.height;
 
-        if(point.x >= x1 && point.x <= x2) {
-            if(point.y >= y1 && point.y <= y2) {
-                if(point.x <= x1 + _this.scaleHandlerWidth) {
-                    style =  'cursor: w-resize;';
-                }
-                else if(point.x >= x2 - _this.scaleHandlerWidth) {
-                    style =  'cursor: e-resize;';
-                }
-                else if(point.y <= y1 + _this.scaleHandlerWidth) {
-                    style =  'cursor: n-resize;';
-                }
-                else if(point.y >= y2 - _this.scaleHandlerWidth) {
-                    style =  'cursor: s-resize;';
-                }
-                else {
-                    style = 'cursor: move;';
-                }
+        if(point.x >= x1 && point.x <= x2 && point.y >= y1 && point.y <= y2) {
+            if(point.x <= x1 + _this.scaleHandSize) {
+                style =  'cursor: w-resize;';
+            }
+            else if(point.x >= x2 - _this.scaleHandSize) {
+                style =  'cursor: e-resize;';
+            }
+            else if(point.y <= y1 + _this.scaleHandSize) {
+                style =  'cursor: n-resize;';
+            }
+            else if(point.y >= y2 - _this.scaleHandSize) {
+                style =  'cursor: s-resize;';
             }
             else {
-                style =  'cursor: default;';
+                style = 'cursor: move;';
             }
         }
         else {
@@ -195,16 +195,16 @@
                     action.index = index;
                     action.name = 'scale';
                     if(index === _this.marks.length - 1) {
-                        if(point.x <= x1 + _this.scaleHandlerWidth) {
+                        if(point.x <= x1 + _this.scaleHandSize) {
                             action.direction = 'left';
                         }
-                        else if(point.x >= x2 - _this.scaleHandlerWidth) {
+                        else if(point.x >= x2 - _this.scaleHandSize) {
                             action.direction = 'right';
                         }
-                        else if(point.y <= y1 + _this.scaleHandlerWidth) {
+                        else if(point.y <= y1 + _this.scaleHandSize) {
                             action.direction = 'top';
                         }
-                        else if(point.y >= y2 - _this.scaleHandlerWidth) {
+                        else if(point.y >= y2 - _this.scaleHandSize) {
                             action.direction = 'bottom';
                         }
                         else {
@@ -236,7 +236,7 @@
         _this.ctx.strokeStyle = _this.pen.normal.color;
         _this.ctx.lineWidth = _this.pen.normal.width;
         _this.marks.forEach(function (item, index) {
-            _this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            _this.ctx.fillStyle = _this.bucket.normal.color;
             _this.ctx.fillRect(item.x, item.y, item.width, item.height);
             if(selected && (_this.marks.length-1) === index) {
                 _this.ctx.strokeStyle = _this.pen.select.color;
@@ -257,7 +257,7 @@
 
         _this.ctx.save();
         _this.ctx.font = _this.pen.coordinate.font;
-        _this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        _this.ctx.fillStyle = _this.bucket.coordinate.color;
         _this.ctx.fillRect(item.x-1, item.y-1, _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.pen.coordinate.font) + verOffset));
         _this.ctx.fillStyle = (selected && (_this.marks.length-1)===index) ? _this.pen.select.color : _this.pen.normal.color;
         _this.ctx.fillText(str, item.x, item.y - verOffset);
@@ -276,7 +276,6 @@
 
     PaperMarker.prototype.drawImage = function () {
         var _this = this;
-
         _this.canvas.width = _this.image.naturalWidth || _this.image.width;
         _this.canvas.height = _this.image.naturalHeight || _this.image.height;
         _this.ctx.drawImage(_this.image, 0, 0, _this.canvas.width, _this.canvas.height);
