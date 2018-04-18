@@ -498,12 +498,12 @@
         document.getElementById('clearRect').onclick = function () {
             paperMarker.clearCurRect();
         };
-∂
+
         document.onkeyup = function (ev) {
             if(ev.keyCode === 8 || ev.keyCode === 46) {
                 paperMarker.clearCurRect();
             }
-        }
+        };
     };
 
 })(window, document);
