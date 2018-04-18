@@ -86,8 +86,7 @@
             _this.rect.y = point.y;
             _this.rect.height = _this.origin.y - point.y;
         }
-
-        // _this.rect.z = _this.marks.length;
+        _this.rect.id = _this.marks.length;
     };
 
     PaperMarker.prototype.setRect = function () {
@@ -95,9 +94,9 @@
         _this.marks.push({
             x: _this.rect.x,
             y: _this.rect.y,
-            // z: _this.rect.z,
             width: _this.rect.width,
-            height: _this.rect.height
+            height: _this.rect.height,
+            id: _this.rect.id
         });
     };
 
@@ -118,28 +117,31 @@
         var offsetW = point.x - _this.slelectOrigin.x;
         var offsetH = point.y - _this.slelectOrigin.y;
 
-        if(direction === 'left') {
-            if(offsetW <= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandSize) {
-                _this.marks[lastItemIndex].x = _this.slelectRect.x + offsetW;
-                _this.marks[lastItemIndex].width = _this.slelectRect.width - offsetW;
+        var ways = direction.split(',');
+        ways.forEach(function (item) {
+            if(item === 'left') {
+                if(offsetW <= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandSize) {
+                    _this.marks[lastItemIndex].x = _this.slelectRect.x + offsetW;
+                    _this.marks[lastItemIndex].width = _this.slelectRect.width - offsetW;
+                }
             }
-        }
-        else if(direction === 'right') {
-            if(offsetW >= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandSize) {
-                _this.marks[lastItemIndex].width = _this.slelectRect.width + offsetW;
+            else if(item === 'right') {
+                if(offsetW >= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandSize) {
+                    _this.marks[lastItemIndex].width = _this.slelectRect.width + offsetW;
+                }
             }
-        }
-        else if(direction === 'top') {
-            if(offsetH <= 0 || _this.marks[lastItemIndex].height > 2*_this.scaleHandSize) {
-                _this.marks[lastItemIndex].y = _this.slelectRect.y + offsetH;
-                _this.marks[lastItemIndex].height = _this.slelectRect.height - offsetH;
+            else if(item === 'top') {
+                if(offsetH <= 0 || _this.marks[lastItemIndex].height > 2*_this.scaleHandSize) {
+                    _this.marks[lastItemIndex].y = _this.slelectRect.y + offsetH;
+                    _this.marks[lastItemIndex].height = _this.slelectRect.height - offsetH;
+                }
             }
-        }
-        else if(direction === 'bottom') {
-            if(offsetH >= 0 || _this.marks[lastItemIndex].height >= 2*_this.scaleHandSize) {
-                _this.marks[lastItemIndex].height = _this.slelectRect.height + offsetH;
+            else if(item === 'bottom') {
+                if(offsetH >= 0 || _this.marks[lastItemIndex].height >= 2*_this.scaleHandSize) {
+                    _this.marks[lastItemIndex].height = _this.slelectRect.height + offsetH;
+                }
             }
-        }
+        });
     };
 
     PaperMarker.prototype.selectRect = function (index) {
@@ -313,6 +315,10 @@
         _this.ctx.drawImage(_this.image, 0, 0, _this.canvas.width, _this.canvas.height);
 
     };
+    
+    PaperMarker.prototype.clearRect = function (id) {
+        
+    };
 
     PaperMarker.prototype.clearCanvas = function () {
         var _this = this;
@@ -350,20 +356,9 @@
                     else if(action.name === 'scale') {
                         _this.canvas.style = 'cursor: move;';
                         _this.getSelectOrigin(action.index);
-                        switch (action.direction) {
-                            case 'left':
-                                _this.canvas.onmousemove = handler.scaleMoveLeft;
-                                break;
-                            case 'right':
-                                _this.canvas.onmousemove = handler.scaleMoveRight;
-                                break;
-                            case 'top':
-                                _this.canvas.onmousemove = handler.scaleMoveTop;
-                                break;
-                            case 'bottom':
-                                _this.canvas.onmousemove = handler.scaleMoveBottom;
-                                break;
-                        }
+                        _this.canvas.onmousemove = function (e) {
+                            handler.scaleMove(e, action.direction);
+                        };
                         _this.canvas.onmouseup = handler.scaleUp;
                     }
                     else {
@@ -408,26 +403,8 @@
                     _this.canvas.onmousemove = handler.activeMove;
                     _this.canvas.onmouseup = null;
                 },
-                scaleMoveTop: function (e) {
-                    _this.setRectSize(e, 'top');
-                    _this.clearCanvas();
-                    _this.drawImage();
-                    _this.drawRectAll(true);
-                },
-                scaleMoveBottom: function (e) {
-                    _this.setRectSize(e, 'bottom');
-                    _this.clearCanvas();
-                    _this.drawImage();
-                    _this.drawRectAll(true);
-                },
-                scaleMoveLeft: function (e) {
-                    _this.setRectSize(e, 'left');
-                    _this.clearCanvas();
-                    _this.drawImage();
-                    _this.drawRectAll(true);
-                },
-                scaleMoveRight: function (e) {
-                    _this.setRectSize(e, 'right');
+                scaleMove: function (e, direction) {
+                    _this.setRectSize(e, direction);
                     _this.clearCanvas();
                     _this.drawImage();
                     _this.drawRectAll(true);
