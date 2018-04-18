@@ -1,11 +1,11 @@
 (function (window, document) {
     'use strict';
 
-    var PaperMarker = function (canvas, imgUrl) {
+    var PaperMarker = function (canvas, imageUrl) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
-        this.imgUrl = imgUrl;
-        this.img = null;
+        this.imageUrl = imageUrl;
+        this.image = new Image();
         this.rect = {};
         this.marks = [];
         this.origin = {
@@ -270,34 +270,21 @@
 
     PaperMarker.prototype.getImage = function (callback) {
         var _this = this;
-        _this.img = new Image();
-        _this.img.src = _this.imgUrl;
-        _this.img.onload = function () {
+        _this.image.src = _this.imageUrl;
+        _this.image.onload = function () {
             if(typeof callback === 'function') {
                 callback();
             }
         };
     };
 
-    PaperMarker.prototype.drawImage = function (callback) {
+    PaperMarker.prototype.drawImage = function () {
         var _this = this;
-        var render = function () {
-            _this.canvas.width = _this.img.naturalWidth || _this.img.width;
-            _this.canvas.height = _this.img.naturalHeight || _this.img.height;
-            _this.ctx.drawImage(_this.img, 0, 0, _this.canvas.width, _this.canvas.height);
-        };
 
-        if(_this.img === null) {
-            _this.getImage(function () {
-                render();
-                if(typeof callback === 'function') {
-                    callback();
-                }
-            });
-        }
-        else {
-            render();
-        }
+        _this.canvas.width = _this.image.naturalWidth || _this.image.width;
+        _this.canvas.height = _this.image.naturalHeight || _this.image.height;
+        _this.ctx.drawImage(_this.image, 0, 0, _this.canvas.width, _this.canvas.height);
+
     };
 
     PaperMarker.prototype.clearCanvas = function () {
@@ -433,15 +420,18 @@
 
     PaperMarker.prototype.init = function () {
         var _this = this;
-        _this.drawImage(function () {
-            _this.handleEvent();
+        _this.getImage(function () {
+            if(_this.image.src) {
+                _this.drawImage();
+                _this.handleEvent();
+            }
         });
     };
 
     window.onload = function () {
         var canvas = document.getElementById('canvas'),
-            imgUrl = document.getElementById('canvasWrap').getAttribute('data-img'),
-            paperMarker = new PaperMarker(canvas, imgUrl);
+            imageUrl = document.getElementById('canvasWrap').getAttribute('data-img'),
+            paperMarker = new PaperMarker(canvas, imageUrl);
 
         paperMarker.init();
         document.getElementById('clearCanvas').onclick = function () {
