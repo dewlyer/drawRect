@@ -30,13 +30,13 @@
         };
         this.bucket = {
             normal: {
-                color: 'rgba(0, 0, 0, 0.1)'
+                color: 'rgba(0, 0, 180, 0.1)'
             },
             coordinate: {
                 color: 'rgba(255, 255, 255, 0.7)'
             }
         };
-        this.scaleHandSize = 5;
+        this.scaleHandSize = 15;
     };
 
 
@@ -161,10 +161,26 @@
 
         if(point.x >= x1 && point.x <= x2 && point.y >= y1 && point.y <= y2) {
             if(point.x <= x1 + _this.scaleHandSize) {
-                style =  'cursor: w-resize;';
+                if(point.y <= y1 + _this.scaleHandSize) {
+                    style =  'cursor: nw-resize;';
+                }
+                else if(point.y >= y2 - _this.scaleHandSize) {
+                    style =  'cursor: sw-resize;';
+                }
+                else {
+                    style =  'cursor: w-resize;';
+                }
             }
             else if(point.x >= x2 - _this.scaleHandSize) {
-                style =  'cursor: e-resize;';
+                if(point.y <= y1 + _this.scaleHandSize) {
+                    style =  'cursor: ne-resize;';
+                }
+                else if(point.y >= y2 - _this.scaleHandSize) {
+                    style =  'cursor: se-resize;';
+                }
+                else {
+                    style =  'cursor: e-resize;';
+                }
             }
             else if(point.y <= y1 + _this.scaleHandSize) {
                 style =  'cursor: n-resize;';
@@ -196,10 +212,26 @@
                     action.name = 'scale';
                     if(index === _this.marks.length - 1) {
                         if(point.x <= x1 + _this.scaleHandSize) {
-                            action.direction = 'left';
+                            if(point.y <= y1 + _this.scaleHandSize) {
+                                action.direction = 'left,top';
+                            }
+                            else if(point.y >= y2 - _this.scaleHandSize) {
+                                action.direction = 'left,bottom';
+                            }
+                            else {
+                                action.direction = 'left';
+                            }
                         }
                         else if(point.x >= x2 - _this.scaleHandSize) {
-                            action.direction = 'right';
+                            if(point.y <= y1 + _this.scaleHandSize) {
+                                action.direction = 'right,top';
+                            }
+                            else if(point.y >= y2 - _this.scaleHandSize) {
+                                action.direction = 'right,bottom';
+                            }
+                            else {
+                                action.direction = 'right';
+                            }
                         }
                         else if(point.y <= y1 + _this.scaleHandSize) {
                             action.direction = 'top';
