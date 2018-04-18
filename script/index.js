@@ -69,6 +69,11 @@
             y: selectItem.y
         };
     };
+    
+    PaperMarker.prototype.getAllRect = function () {
+        var _this = this;
+        return _this.marks;
+    };
 
     PaperMarker.prototype.getRectById = function (id) {
         var _this = this,
@@ -497,6 +502,12 @@
 
         document.getElementById('clearRect').onclick = function () {
             paperMarker.clearCurRect();
+        };
+
+        document.getElementById('getRectInfo').onclick = function () {
+            var rectList = paperMarker.getAllRect();
+            console.log(rectList);
+            alert(JSON.stringify(rectList))
         };
 
         document.onkeyup = function (ev) {

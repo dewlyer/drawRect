@@ -7,16 +7,16 @@
     <link rel="stylesheet" href="style/index.css">
 </head>
 <body>
-
     <div id="canvasWrap" class="canvas-wrap" data-img="./images/bg.jpg">
         <canvas class="canvas" id="canvas" width="300" height="300">
             当前浏览器不支持canvas
         </canvas>
-        <button type="button" class="canvas-clear" id="clearCanvas">全部清除</button>
-        <button type="button" class="canvas-clear" id="clearRect">删除选中</button>
+        <div class="canvas-buts">
+            <div><button type="button" class="canvas-button" id="clearCanvas">全部清除</button></div>
+            <div><button type="button" class="canvas-button" id="clearRect">删除选中</button></div>
+            <div><button type="button" class="canvas-button" id="getRectInfo">输出信息</button></div>
+        </div>
     </div>
-
     <script src="script/index.js"></script>
-
 </body>
 </html>
