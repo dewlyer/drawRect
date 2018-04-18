@@ -287,7 +287,8 @@
         var verOffset = 4;
         var horOffset = 4;
         var str = 'X:' + item.x + ' - Y:' + item.y + ' - Z:' + index +
-            ' - Width:' + item.width + ' - Height:' + item.height;
+            ' - Width:' + item.width + ' - Height:' + item.height +
+            ' - Id:' + item.id;
 
         _this.ctx.save();
         _this.ctx.font = _this.pen.coordinate.font;
@@ -315,10 +316,6 @@
         _this.ctx.drawImage(_this.image, 0, 0, _this.canvas.width, _this.canvas.height);
 
     };
-    
-    PaperMarker.prototype.clearRect = function (id) {
-        
-    };
 
     PaperMarker.prototype.clearCanvas = function () {
         var _this = this;
@@ -330,11 +327,42 @@
         _this.marks = [];
     };
 
+    PaperMarker.prototype.clearRect = function (id) {
+        var _this = this,
+            index;
+
+        _this.marks.every(function (item, i) {
+            if(item.id === id) {
+                index = i;
+                return false;
+            }
+            else {
+                return true;
+            }
+        });
+        if(typeof index === 'number') {
+            _this.marks.splice(index, 1);
+        }
+        _this.reDraw();
+    };
+
+    PaperMarker.prototype.clearCurRect = function () {
+        var _this = this;
+        var id = _this.marks[_this.marks.length - 1].id;
+        _this.clearRect(id);
+    };
+
     PaperMarker.prototype.clear = function () {
         var _this = this;
         _this.clearMarks();
+        _this.reDraw();
+    };
+
+    PaperMarker.prototype.reDraw = function () {
+        var _this = this;
         _this.clearCanvas();
         _this.drawImage();
+        _this.drawRectAll();
     };
 
     PaperMarker.prototype.handleEvent = function () {
@@ -443,6 +471,9 @@
         paperMarker.init();
         document.getElementById('clearCanvas').onclick = function () {
             paperMarker.clear();
+        };
+        document.getElementById('clearRect').onclick = function () {
+            paperMarker.clearCurRect();
         };
     };
 
