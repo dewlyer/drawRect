@@ -184,8 +184,9 @@
 
     PaperMarker.prototype.getMouseAction = function (event) {
         var _this = this;
-        var action = { name: 'append', index: 0 };
+        var action = { name: 'append', index: 0, direction: '' };
         var point = _this.getPosition(event);
+
         if(_this.marks.length > 0) {
             _this.marks.forEach(function (item, index) {
                 var x1, x2, y1, y2;
@@ -222,6 +223,7 @@
                 }
             });
         }
+
         return action;
     };
 
@@ -424,6 +426,9 @@
             if(_this.image.src) {
                 _this.drawImage();
                 _this.handleEvent();
+            }
+            else {
+                alert('图片加载错误');
             }
         });
     };
