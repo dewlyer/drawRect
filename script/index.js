@@ -189,36 +189,30 @@
 
         if(_this.marks.length > 0) {
             _this.marks.forEach(function (item, index) {
-                var x1, x2, y1, y2;
-                x1 = item.x;
-                y1 = item.y;
-                x2 = item.x + item.width;
-                y2 = item.y + item.height;
-
-                if(point.x >= x1 && point.x <= x2) {
-                    if(point.y >= y1 && point.y <= y2) {
-                        action.index = index;
-                        action.name = 'scale';
-                        if(index === _this.marks.length - 1) {
-                            if(point.x <= x1 + _this.scaleHandlerWidth) {
-                                action.direction = 'left';
-                            }
-                            else if(point.x >= x2 - _this.scaleHandlerWidth) {
-                                action.direction = 'right';
-                            }
-                            else if(point.y <= y1 + _this.scaleHandlerWidth) {
-                                action.direction = 'top';
-                            }
-                            else if(point.y >= y2 - _this.scaleHandlerWidth) {
-                                action.direction = 'bottom';
-                            }
-                            else {
-                                action.name = 'move';
-                            }
+                var x1 = item.x, x2 = item.x + item.width,
+                    y1 = item.y, y2 = item.y + item.height;
+                if(point.x >= x1 && point.x <= x2 && point.y >= y1 && point.y <= y2) {
+                    action.index = index;
+                    action.name = 'scale';
+                    if(index === _this.marks.length - 1) {
+                        if(point.x <= x1 + _this.scaleHandlerWidth) {
+                            action.direction = 'left';
+                        }
+                        else if(point.x >= x2 - _this.scaleHandlerWidth) {
+                            action.direction = 'right';
+                        }
+                        else if(point.y <= y1 + _this.scaleHandlerWidth) {
+                            action.direction = 'top';
+                        }
+                        else if(point.y >= y2 - _this.scaleHandlerWidth) {
+                            action.direction = 'bottom';
                         }
                         else {
                             action.name = 'move';
                         }
+                    }
+                    else {
+                        action.name = 'move';
                     }
                 }
             });
