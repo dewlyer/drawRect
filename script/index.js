@@ -48,21 +48,53 @@
         };
     };
 
-    PaperMarker.prototype.getOrigin = function (event) {
+    PaperMarker.prototype.setOriginPoint = function (event) {
         var _this = this;
         _this.origin = _this.getPosition(event);
     };
 
-    PaperMarker.prototype.getSelectOrigin = function (index) {
+    PaperMarker.prototype.clearSelectRect = function () {
+        var _this = this;
+        _this.slelectRect = {};
+    };
+    PaperMarker.prototype.setSelectRect = function (index) {
         var _this = this;
         var selectItem = _this.marks[index];
         _this.slelectOrigin = _this.getPosition(event);
         _this.slelectRect = {
+            id: selectItem.id,
             width: selectItem.width,
             height: selectItem.height,
             x: selectItem.x,
             y: selectItem.y
         };
+    };
+
+    PaperMarker.prototype.getRectById = function (id) {
+        var _this = this,
+            index = null;
+
+        _this.marks.every(function (item, i) {
+            if(item.id === id) {
+                index = i;
+                return false;
+            }
+            else {
+                return true;
+            }
+        });
+
+        return index;
+    };
+
+    PaperMarker.prototype.getSelectRect = function () {
+        var _this = this;
+        if((typeof _this.slelectRect !== 'undefined') && (typeof _this.slelectRect.id !== 'undefined')) {
+            return _this.getRectById(_this.slelectRect.id);
+        }
+        else {
+            return null;
+        }
     };
 
     PaperMarker.prototype.getRect = function (event) {
@@ -100,19 +132,17 @@
         });
     };
 
-    PaperMarker.prototype.setRectOffset = function (event) {
+    PaperMarker.prototype.setRectOffset = function (event, itemIndex) {
         var _this = this;
-        var lastItemIndex = _this.marks.length - 1;
         var position = _this.getPosition(event);
         var offsetX = position.x - _this.slelectOrigin.x;
         var offsetY = position.y - _this.slelectOrigin.y;
-        _this.marks[lastItemIndex].x = _this.slelectRect.x + offsetX;
-        _this.marks[lastItemIndex].y = _this.slelectRect.y + offsetY;
+        _this.marks[itemIndex].x = _this.slelectRect.x + offsetX;
+        _this.marks[itemIndex].y = _this.slelectRect.y + offsetY;
     };
 
-    PaperMarker.prototype.setRectSize = function (event, direction) {
+    PaperMarker.prototype.setRectSize = function (event, itemIndex, direction) {
         var _this = this;
-        var lastItemIndex = _this.marks.length - 1;
         var point = _this.getPosition(event);
         var offsetW = point.x - _this.slelectOrigin.x;
         var offsetH = point.y - _this.slelectOrigin.y;
@@ -120,44 +150,44 @@
         var ways = direction.split(',');
         ways.forEach(function (item) {
             if(item === 'left') {
-                if(offsetW <= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandSize) {
-                    _this.marks[lastItemIndex].x = _this.slelectRect.x + offsetW;
-                    _this.marks[lastItemIndex].width = _this.slelectRect.width - offsetW;
+                if(offsetW <= 0 || _this.marks[itemIndex].width >= 2*_this.scaleHandSize) {
+                    _this.marks[itemIndex].x = _this.slelectRect.x + offsetW;
+                    _this.marks[itemIndex].width = _this.slelectRect.width - offsetW;
                 }
             }
             else if(item === 'right') {
-                if(offsetW >= 0 || _this.marks[lastItemIndex].width >= 2*_this.scaleHandSize) {
-                    _this.marks[lastItemIndex].width = _this.slelectRect.width + offsetW;
+                if(offsetW >= 0 || _this.marks[itemIndex].width >= 2*_this.scaleHandSize) {
+                    _this.marks[itemIndex].width = _this.slelectRect.width + offsetW;
                 }
             }
             else if(item === 'top') {
-                if(offsetH <= 0 || _this.marks[lastItemIndex].height > 2*_this.scaleHandSize) {
-                    _this.marks[lastItemIndex].y = _this.slelectRect.y + offsetH;
-                    _this.marks[lastItemIndex].height = _this.slelectRect.height - offsetH;
+                if(offsetH <= 0 || _this.marks[itemIndex].height > 2*_this.scaleHandSize) {
+                    _this.marks[itemIndex].y = _this.slelectRect.y + offsetH;
+                    _this.marks[itemIndex].height = _this.slelectRect.height - offsetH;
                 }
             }
             else if(item === 'bottom') {
-                if(offsetH >= 0 || _this.marks[lastItemIndex].height >= 2*_this.scaleHandSize) {
-                    _this.marks[lastItemIndex].height = _this.slelectRect.height + offsetH;
+                if(offsetH >= 0 || _this.marks[itemIndex].height >= 2*_this.scaleHandSize) {
+                    _this.marks[itemIndex].height = _this.slelectRect.height + offsetH;
                 }
             }
         });
     };
 
-    PaperMarker.prototype.selectRect = function (index) {
+    PaperMarker.prototype.sortRect = function (index) {
         var _this = this;
         var selectedRect = _this.marks[index];
         _this.marks.splice(index, 1);
         _this.marks.push(selectedRect);
     };
 
-    PaperMarker.prototype.setCursorStyle = function (event) {
+    PaperMarker.prototype.setCursorStyle = function (event, itemIndex) {
         var _this = this;
         if(_this.marks.length <= 0) { return }
 
         var point = _this.getPosition(event);
+        var item = _this.marks[itemIndex];
         var style =  'cursor: move;';
-        var item = _this.marks[_this.marks.length - 1];
         var x1 = item.x, x2 = item.x + item.width,
             y1 = item.y, y2 = item.y + item.height;
 
@@ -204,6 +234,7 @@
         var _this = this;
         var action = { name: 'append', index: 0, direction: '' };
         var point = _this.getPosition(event);
+        var itemIndex = _this.getSelectRect();
 
         if(_this.marks.length > 0) {
             _this.marks.forEach(function (item, index) {
@@ -212,7 +243,7 @@
                 if(point.x >= x1 && point.x <= x2 && point.y >= y1 && point.y <= y2) {
                     action.index = index;
                     action.name = 'scale';
-                    if(index === _this.marks.length - 1) {
+                    if(index === itemIndex) {
                         if(point.x <= x1 + _this.scaleHandSize) {
                             if(point.y <= y1 + _this.scaleHandSize) {
                                 action.direction = 'left,top';
@@ -266,35 +297,37 @@
 
     PaperMarker.prototype.drawRectAll = function (selected) {
         var _this = this;
+        var selectIndex = _this.getSelectRect();
         _this.ctx.save();
         _this.ctx.strokeStyle = _this.pen.normal.color;
         _this.ctx.lineWidth = _this.pen.normal.width;
         _this.marks.forEach(function (item, index) {
+            _this.ctx.save();
             _this.ctx.fillStyle = _this.bucket.normal.color;
             _this.ctx.fillRect(item.x, item.y, item.width, item.height);
-            if(selected && (_this.marks.length-1) === index) {
+            if(selected && selectIndex === index) {
                 _this.ctx.strokeStyle = _this.pen.select.color;
                 _this.ctx.lineWidth = _this.pen.select.width;
             }
             _this.ctx.strokeRect(item.x, item.y, item.width, item.height);
-            _this.drawCoordinate(item, index, selected);
+            _this.ctx.restore();
+            _this.drawCoordinate(item, index, selected, selectIndex);
         });
         _this.ctx.restore();
     };
 
-    PaperMarker.prototype.drawCoordinate = function (item, index, selected) {
+    PaperMarker.prototype.drawCoordinate = function (item, index, selected, selectIndex) {
         var _this = this;
         var verOffset = 4;
         var horOffset = 4;
-        var str = 'X:' + item.x + ' - Y:' + item.y + ' - Z:' + index +
-            ' - Width:' + item.width + ' - Height:' + item.height +
-            ' - Id:' + item.id;
+        var str = 'ID:' + item.id + ' - X:' + item.x + ' / Y:' + item.y + ' / Z:' + index +
+            ' - W:' + item.width + ' / H:' + item.height;
 
         _this.ctx.save();
         _this.ctx.font = _this.pen.coordinate.font;
         _this.ctx.fillStyle = _this.bucket.coordinate.color;
         _this.ctx.fillRect(item.x-1, item.y-1, _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.pen.coordinate.font) + verOffset));
-        _this.ctx.fillStyle = (selected && (_this.marks.length-1)===index) ? _this.pen.select.color : _this.pen.normal.color;
+        _this.ctx.fillStyle = (selected && selectIndex === index) ? _this.pen.select.color : _this.pen.normal.color;
         _this.ctx.fillText(str, item.x, item.y - verOffset);
         _this.ctx.restore();
     };
@@ -314,7 +347,6 @@
         _this.canvas.width = _this.image.naturalWidth || _this.image.width;
         _this.canvas.height = _this.image.naturalHeight || _this.image.height;
         _this.ctx.drawImage(_this.image, 0, 0, _this.canvas.width, _this.canvas.height);
-
     };
 
     PaperMarker.prototype.clearCanvas = function () {
@@ -329,27 +361,22 @@
 
     PaperMarker.prototype.clearRect = function (id) {
         var _this = this,
-            index;
+            index = _this.getRectById(id);
 
-        _this.marks.every(function (item, i) {
-            if(item.id === id) {
-                index = i;
-                return false;
-            }
-            else {
-                return true;
-            }
-        });
-        if(typeof index === 'number') {
+        if(index !== null) {
             _this.marks.splice(index, 1);
+            _this.reDraw();
         }
-        _this.reDraw();
     };
 
     PaperMarker.prototype.clearCurRect = function () {
         var _this = this;
-        var id = _this.marks[_this.marks.length - 1].id;
-        _this.clearRect(id);
+        var itemIndex = _this.getSelectRect();
+        if(itemIndex !== null) {
+            var id = _this.marks[itemIndex].id;
+            _this.clearRect(id);
+            _this.canvas.onmousemove = null;
+        }
     };
 
     PaperMarker.prototype.clear = function () {
@@ -358,32 +385,33 @@
         _this.reDraw();
     };
 
-    PaperMarker.prototype.reDraw = function () {
+    PaperMarker.prototype.reDraw = function (selected) {
         var _this = this;
         _this.clearCanvas();
         _this.drawImage();
-        _this.drawRectAll();
+        _this.drawRectAll(selected);
     };
 
     PaperMarker.prototype.handleEvent = function () {
         var _this = this,
+            selectIndex = null,
             handler = {
                 mouseDown: function (e) {
                     if(e.button !== 0) return;
                     var action = _this.getMouseAction(e);
                     if(action.name === 'move') {
                         _this.canvas.style = 'cursor: move;';
-                        _this.getSelectOrigin(action.index);
-                        _this.selectRect(action.index);
-                        _this.clearCanvas();
-                        _this.drawImage();
-                        _this.drawRectAll(true);
+                        _this.setSelectRect(action.index);
+                        _this.sortRect(action.index);
+                        selectIndex = _this.getSelectRect();
+                        _this.reDraw(true);
                         _this.canvas.onmousemove = handler.selectMove;
                         _this.canvas.onmouseup = handler.selectUp;
                     }
                     else if(action.name === 'scale') {
                         _this.canvas.style = 'cursor: move;';
-                        _this.getSelectOrigin(action.index);
+                        _this.setSelectRect(action.index);
+                        selectIndex = _this.getSelectRect();
                         _this.canvas.onmousemove = function (e) {
                             handler.scaleMove(e, action.direction);
                         };
@@ -391,57 +419,50 @@
                     }
                     else {
                         _this.canvas.style = 'cursor: default;';
-                        _this.getOrigin(e);
+                        _this.setOriginPoint(e);
+                        _this.clearSelectRect();
                         _this.canvas.onmousemove = handler.mouseMove;
                         _this.canvas.onmouseup = handler.mouseUp;
                     }
                 },
                 mouseMove: function (e) {
                     _this.getRect(e);
-                    _this.clearCanvas();
-                    _this.drawImage();
-                    _this.drawRectAll();
+                    _this.reDraw();
                     _this.drawRectCur();
                 },
                 mouseUp: function (e) {
                     if(e.button !== 0) return;
                     _this.getRect(e);
                     _this.setRect();
-                    _this.clearCanvas();
-                    _this.drawImage();
-                    _this.drawRectAll();
+                    _this.reDraw();
                     _this.canvas.onmousemove = null;
                     _this.canvas.onmouseup = null;
                 },
                 activeMove: function (e) {
-                    _this.setCursorStyle(e);
+                    // selectIndex = _this.getSelectRect();
+                    _this.setCursorStyle(e, selectIndex);
                 },
                 selectMove: function (e) {
-                    _this.setRectOffset(e);
-                    _this.clearCanvas();
-                    _this.drawImage();
-                    _this.drawRectAll(true);
+                    // selectIndex = _this.getSelectRect();
+                    _this.setRectOffset(e, selectIndex);
+                    _this.reDraw(true);
                 },
                 selectUp: function (e) {
                     if(e.button !== 0) return;
-                    _this.setRectOffset(e);
-                    _this.clearCanvas();
-                    _this.drawImage();
-                    _this.drawRectAll(true);
+                    // selectIndex = _this.getSelectRect();
+                    _this.setRectOffset(e, selectIndex);
+                    _this.reDraw(true);
                     _this.canvas.onmousemove = handler.activeMove;
                     _this.canvas.onmouseup = null;
                 },
                 scaleMove: function (e, direction) {
-                    _this.setRectSize(e, direction);
-                    _this.clearCanvas();
-                    _this.drawImage();
-                    _this.drawRectAll(true);
+                    // selectIndex = _this.getSelectRect();
+                    _this.setRectSize(e, selectIndex, direction);
+                    _this.reDraw(true);
                 },
                 scaleUp: function (e) {
                     if(e.button !== 0) return;
-                    _this.clearCanvas();
-                    _this.drawImage();
-                    _this.drawRectAll(true);
+                    _this.reDraw(true);
                     _this.canvas.onmousemove = handler.activeMove;
                     _this.canvas.onmouseup = null;
                 }
@@ -469,12 +490,20 @@
             paperMarker = new PaperMarker(canvas, imageUrl);
 
         paperMarker.init();
+
         document.getElementById('clearCanvas').onclick = function () {
             paperMarker.clear();
         };
+
         document.getElementById('clearRect').onclick = function () {
             paperMarker.clearCurRect();
         };
+∂
+        document.onkeyup = function (ev) {
+            if(ev.keyCode === 8 || ev.keyCode === 46) {
+                paperMarker.clearCurRect();
+            }
+        }
     };
 
 })(window, document);
