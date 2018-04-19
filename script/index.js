@@ -13,15 +13,15 @@
         };
         this.pen = {
             normal: {
-                color: 'blue',
-                width: 1
-            },
-            active: {
-                color: 'green',
+                color: 'rgb(20, 71, 204)',
                 width: 1
             },
             select: {
-                color: 'red',
+                color: 'rgb(255, 48, 0)',
+                width: 1
+            },
+            active: {
+                color: 'rgb(98, 98, 98)',
                 width: 1
             },
             coordinate: {
@@ -30,10 +30,13 @@
         };
         this.bucket = {
             normal: {
-                color: 'rgba(0, 0, 180, 0.1)'
+                color: 'rgba(20, 71, 204, 0.25)'
+            },
+            select: {
+                color: 'rgba(255, 48, 0, 0.25)'
             },
             coordinate: {
-                color: 'rgba(255, 255, 255, 0.7)'
+                color: 'rgba(255, 255, 255, 0.75)'
             }
         };
         this.scaleHandSize = 15;
@@ -300,24 +303,36 @@
         _this.ctx.restore();
     };
 
-    PaperMarker.prototype.drawRectAll = function (selected) {
+    PaperMarker.prototype.drawRectList = function (selected) {
         var _this = this;
-        var selectIndex = _this.getSelectRect();
+        var selectIndex = null;
+        if(selected) {
+            selectIndex = _this.getSelectRect();
+        }
         _this.ctx.save();
         _this.ctx.strokeStyle = _this.pen.normal.color;
         _this.ctx.lineWidth = _this.pen.normal.width;
+        _this.ctx.fillStyle = _this.bucket.normal.color;
+
         _this.marks.forEach(function (item, index) {
-            _this.ctx.save();
-            _this.ctx.fillStyle = _this.bucket.normal.color;
-            _this.ctx.fillRect(item.x, item.y, item.width, item.height);
-            if(selected && selectIndex === index) {
+            if(selectIndex === index) {
+                _this.ctx.save();
                 _this.ctx.strokeStyle = _this.pen.select.color;
                 _this.ctx.lineWidth = _this.pen.select.width;
+                _this.ctx.fillStyle = _this.bucket.select.color;
+                _this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                _this.ctx.shadowOffsetX = 0;
+                _this.ctx.shadowOffsetY = 2;
+                _this.ctx.shadowBlur = 3;
             }
+            _this.ctx.fillRect(item.x, item.y, item.width, item.height);
             _this.ctx.strokeRect(item.x, item.y, item.width, item.height);
-            _this.ctx.restore();
+            if(selectIndex === index) {
+                _this.ctx.restore();
+            }
             _this.drawCoordinate(item, index, selected, selectIndex);
         });
+
         _this.ctx.restore();
     };
 
@@ -394,7 +409,7 @@
         var _this = this;
         _this.clearCanvas();
         _this.drawImage();
-        _this.drawRectAll(selected);
+        _this.drawRectList(selected);
     };
 
     PaperMarker.prototype.handleEvent = function () {
