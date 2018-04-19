@@ -21,7 +21,8 @@
                 width: 1
             },
             active: {
-                color: 'rgb(98, 98, 98)',
+                dashed: [5, 3],
+                color: 'rgb(60, 60, 60)',
                 width: 1
             },
             coordinate: {
@@ -299,6 +300,7 @@
         _this.ctx.save();
         _this.ctx.strokeStyle = _this.pen.active.color;
         _this.ctx.lineWidth = _this.pen.active.width;
+        _this.ctx.setLineDash(_this.pen.active.dashed);
         _this.ctx.strokeRect(_this.rect.x, _this.rect.y, _this.rect.width, _this.rect.height);
         _this.ctx.restore();
     };
