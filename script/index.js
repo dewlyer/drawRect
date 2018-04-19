@@ -14,6 +14,7 @@
         this.pen = {
             normal: {
                 color: 'rgb(20, 71, 204)',
+                join: 'round',
                 width: 1
             },
             select: {
@@ -73,13 +74,21 @@
             y: selectItem.y
         };
     };
+
+    PaperMarker.prototype.getSelectRect = function () {
+        var _this = this;
+        var index = _this.getSelectRectIndex();
+        if(index !== null) {
+            return _this.marks[index];
+        }
+    };
     
     PaperMarker.prototype.getAllRect = function () {
         var _this = this;
         return _this.marks;
     };
 
-    PaperMarker.prototype.getRectById = function (id) {
+    PaperMarker.prototype.getRectIndexById = function (id) {
         var _this = this,
             index = null;
 
@@ -96,10 +105,10 @@
         return index;
     };
 
-    PaperMarker.prototype.getSelectRect = function () {
+    PaperMarker.prototype.getSelectRectIndex = function () {
         var _this = this;
         if((typeof _this.slelectRect !== 'undefined') && (typeof _this.slelectRect.id !== 'undefined')) {
-            return _this.getRectById(_this.slelectRect.id);
+            return _this.getRectIndexById(_this.slelectRect.id);
         }
         else {
             return null;
@@ -256,7 +265,7 @@
         var _this = this;
         var action = { name: 'append', index: 0, direction: '' };
         var point = _this.getPosition(event);
-        var itemIndex = _this.getSelectRect();
+        var itemIndex = _this.getSelectRectIndex();
 
         if(_this.marks.length > 0) {
             _this.marks.forEach(function (item, index) {
@@ -322,11 +331,12 @@
         var _this = this;
         var selectIndex = null;
         if(selected) {
-            selectIndex = _this.getSelectRect();
+            selectIndex = _this.getSelectRectIndex();
         }
         _this.ctx.save();
-        _this.ctx.strokeStyle = _this.pen.normal.color;
+        _this.ctx.lineJoin = _this.pen.normal.join;
         _this.ctx.lineWidth = _this.pen.normal.width;
+        _this.ctx.strokeStyle = _this.pen.normal.color;
         _this.ctx.fillStyle = _this.bucket.normal.color;
 
         _this.marks.forEach(function (item, index) {
@@ -396,7 +406,7 @@
 
     PaperMarker.prototype.clearRect = function (id) {
         var _this = this,
-            index = _this.getRectById(id);
+            index = _this.getRectIndexById(id);
 
         if(index !== null) {
             _this.marks.splice(index, 1);
@@ -406,7 +416,7 @@
 
     PaperMarker.prototype.clearCurRect = function () {
         var _this = this;
-        var itemIndex = _this.getSelectRect();
+        var itemIndex = _this.getSelectRectIndex();
         if(itemIndex !== null) {
             var id = _this.marks[itemIndex].id;
             _this.clearRect(id);
@@ -438,7 +448,7 @@
                         _this.canvas.style = 'cursor: move;';
                         _this.setSelectRect(action.index);
                         _this.sortRect(action.index);
-                        selectIndex = _this.getSelectRect();
+                        selectIndex = _this.getSelectRectIndex();
                         _this.reDraw(true);
                         _this.canvas.onmousemove = handler.selectMove;
                         _this.canvas.onmouseup = handler.selectUp;
@@ -446,7 +456,7 @@
                     else if(action.name === 'scale') {
                         _this.canvas.style = 'cursor: move;';
                         _this.setSelectRect(action.index);
-                        selectIndex = _this.getSelectRect();
+                        selectIndex = _this.getSelectRectIndex();
                         _this.canvas.onmousemove = function (e) {
                             handler.scaleMove(e, action.direction);
                         };
@@ -479,24 +489,24 @@
                     _this.canvas.onmouseup = null;
                 },
                 activeMove: function (e) {
-                    // selectIndex = _this.getSelectRect();
+                    // selectIndex = _this.getSelectRectIndex();
                     _this.setCursorStyle(e, selectIndex);
                 },
                 selectMove: function (e) {
-                    // selectIndex = _this.getSelectRect();
+                    // selectIndex = _this.getSelectRectIndex();
                     _this.setRectOffset(e, selectIndex);
                     _this.reDraw(true);
                 },
                 selectUp: function (e) {
                     if(e.button !== 0) return;
-                    // selectIndex = _this.getSelectRect();
+                    // selectIndex = _this.getSelectRectIndex();
                     _this.setRectOffset(e, selectIndex);
                     _this.reDraw(true);
                     _this.canvas.onmousemove = handler.activeMove;
                     _this.canvas.onmouseup = null;
                 },
                 scaleMove: function (e, direction) {
-                    // selectIndex = _this.getSelectRect();
+                    // selectIndex = _this.getSelectRectIndex();
                     _this.setRectSize(e, selectIndex, direction);
                     _this.reDraw(true);
                 },
@@ -541,8 +551,29 @@
 
         document.getElementById('getRectInfo').onclick = function () {
             var rectList = paperMarker.getAllRect();
-            console.log(rectList);
-            alert(JSON.stringify(rectList))
+            if(rectList.length > 0) {
+                console.log(rectList);
+                alert(JSON.stringify(rectList));
+            }
+            else {
+                alert('没有可输出的信息');
+            }
+        };
+
+        document.getElementById('getSelectInfo').onclick = function () {
+            var selectRect = paperMarker.getSelectRect();
+            if(selectRect) {
+                var str = 'ID : ' + selectRect.id + '\n';
+                str += 'X : ' + selectRect.x + '\n';
+                str += 'Y : ' + selectRect.y + '\n';
+                str += 'Width : ' + selectRect.width + '\n';
+                str += 'Height :' + selectRect.height;
+                alert(str);
+                console.log(selectRect);
+            }
+            else {
+                alert('没有选中的目标');
+            }
         };
 
         document.onkeyup = function (ev) {
