@@ -40,7 +40,7 @@
                 color: 'rgba(255, 255, 255, 0.75)'
             }
         };
-        this.scaleHandSize = 15;
+        this.scaleHandSize = 10;
     };
 
 
@@ -128,6 +128,19 @@
             _this.rect.height = _this.origin.y - point.y;
         }
         _this.rect.id = _this.marks.length;
+    };
+
+    PaperMarker.prototype.canAppendRect = function (event, success, failure) {
+        var _this = this;
+        var point = _this.getPosition(event);
+        var width = Math.abs(point.x - _this.origin.x);
+        var height = Math.abs(point.y - _this.origin.y);
+        if(width > 2*_this.scaleHandSize && height > 2*_this.scaleHandSize) {
+            (typeof success === 'function') && success();
+        }
+        else {
+            (typeof failure === 'function') && failure();
+        }
     };
 
     PaperMarker.prototype.setRect = function () {
@@ -440,6 +453,7 @@
                         _this.canvas.onmouseup = handler.scaleUp;
                     }
                     else {
+                        // append rect
                         _this.canvas.style = 'cursor: default;';
                         _this.setOriginPoint(e);
                         _this.clearSelectRect();
@@ -454,8 +468,12 @@
                 },
                 mouseUp: function (e) {
                     if(e.button !== 0) return;
-                    _this.getRect(e);
-                    _this.setRect();
+                    _this.canAppendRect(e, function () {
+                        _this.getRect(e);
+                        _this.setRect();
+                    }, function () {
+                        // alert('所选区域太小，请重现选取！');
+                    });
                     _this.reDraw();
                     _this.canvas.onmousemove = null;
                     _this.canvas.onmouseup = null;
