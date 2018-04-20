@@ -10,6 +10,7 @@
         this.marks = [];
         this.origin = { x: 0, y: 0 };
         this.scaleHandSize = 10;
+        this.canvasScale = 1;
         this.pen = {
             normal: {
                 color: 'rgb(20, 71, 204)',
@@ -53,9 +54,10 @@
     };
 
     PaperMarker.prototype.getPosition = function (event) {
+        var _this = this;
         return {
-            x: event.x + window.scrollX,
-            y: event.y + window.scrollY
+            x: (event.x) / _this.canvasScale + window.scrollX,
+            y: (event.y) / _this.canvasScale + window.scrollY
         };
     };
 
@@ -319,10 +321,17 @@
         _this.canvas.style = style;
     };
 
+    PaperMarker.prototype.setCanvasScale = function (scale) {
+        var _this = this;
+        _this.canvasScale *= scale;
+        _this.reDraw();
+    };
+
     PaperMarker.prototype.drawImage = function () {
         var _this = this;
-        _this.canvas.width = _this.image.naturalWidth || _this.image.width;
-        _this.canvas.height = _this.image.naturalHeight || _this.image.height;
+        _this.ctx.scale(_this.canvasScale, _this.canvasScale);
+        _this.canvas.width = (_this.image.naturalWidth || _this.image.width) * _this.canvasScale;
+        _this.canvas.height = (_this.image.naturalHeight || _this.image.height) * _this.canvasScale;
         _this.ctx.drawImage(_this.image, 0, 0, _this.canvas.width, _this.canvas.height);
     };
 
@@ -332,7 +341,7 @@
         _this.ctx.strokeStyle = _this.pen.active.color;
         _this.ctx.lineWidth = _this.pen.active.width;
         _this.ctx.setLineDash(_this.pen.active.dashed);
-        _this.ctx.strokeRect(_this.rect.x, _this.rect.y, _this.rect.width, _this.rect.height);
+        _this.ctx.strokeRect(_this.rect.x * _this.canvasScale, _this.rect.y * _this.canvasScale, _this.rect.width * _this.canvasScale, _this.rect.height * _this.canvasScale);
         _this.ctx.restore();
     };
 
@@ -359,8 +368,8 @@
                 _this.ctx.shadowOffsetY = 2;
                 _this.ctx.shadowBlur = 3;
             }
-            _this.ctx.fillRect(item.x, item.y, item.width, item.height);
-            _this.ctx.strokeRect(item.x, item.y, item.width, item.height);
+            _this.ctx.fillRect(item.x * _this.canvasScale, item.y * _this.canvasScale, item.width * _this.canvasScale, item.height * _this.canvasScale);
+            _this.ctx.strokeRect(item.x * _this.canvasScale, item.y * _this.canvasScale, item.width * _this.canvasScale, item.height * _this.canvasScale);
             if(selectIndex === index) {
                 _this.ctx.restore();
             }
@@ -380,9 +389,9 @@
         _this.ctx.save();
         _this.ctx.font = _this.pen.coordinate.font;
         _this.ctx.fillStyle = _this.bucket.coordinate.color;
-        _this.ctx.fillRect(item.x-1, item.y-1, _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.pen.coordinate.font) + verOffset));
+        _this.ctx.fillRect(item.x * _this.canvasScale -1, item.y * _this.canvasScale-1, _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.pen.coordinate.font) + verOffset));
         _this.ctx.fillStyle = (selected && selectIndex === index) ? _this.pen.select.color : _this.pen.normal.color;
-        _this.ctx.fillText(str, item.x, item.y - verOffset);
+        _this.ctx.fillText(str, item.x * _this.canvasScale, item.y * _this.canvasScale - verOffset);
         _this.ctx.restore();
     };
 
@@ -578,6 +587,14 @@
             else {
                 alert('没有选中的目标');
             }
+        };
+
+        document.getElementById('setScaleUp').onclick = function () {
+            paperMarker.setCanvasScale(2);
+        };
+
+        document.getElementById('setScaleDown').onclick = function () {
+            paperMarker.setCanvasScale(0.5);
         };
 
         document.onkeyup = function (ev) {
