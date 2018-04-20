@@ -56,8 +56,8 @@
     PaperMarker.prototype.getPosition = function (event) {
         var _this = this;
         return {
-            x: (event.x) / _this.canvasScale + window.scrollX,
-            y: (event.y) / _this.canvasScale + window.scrollY
+            x: (event.x + window.scrollX) / _this.canvasScale,
+            y: (event.y + window.scrollY) / _this.canvasScale
         };
     };
 
