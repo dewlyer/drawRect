@@ -536,12 +536,13 @@
             _this.canvas.onmousedown = handler.mouseDown;
         },
 
-        init: function () {
+        initialize: function (callback) {
             var _this = this;
             _this.getImage(function () {
                 if(_this.image.src) {
                     _this.drawImage();
                     _this.handleEvent();
+                    if(typeof callback === 'function') callback();
                 }
                 else {
                     alert('图片加载错误');

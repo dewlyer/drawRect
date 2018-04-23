@@ -51,14 +51,15 @@
                 }
             };
 
-        paperMarker.init();
-        document.onkeyup = events.clearCurRect;
-        document.getElementById('clearCanvas').onclick = events.clearCanvas;
-        document.getElementById('clearRect').onclick = events.clearRect;
-        document.getElementById('getRectInfo').onclick = events.getRectInfo;
-        document.getElementById('getSelectInfo').onclick = events.getSelectInfo;
-        document.getElementById('setScaleUp').onclick = events.setScaleUp;
-        document.getElementById('setScaleDown').onclick = events.setScaleDown;
+        paperMarker.initialize(function () {
+            document.onkeyup = events.clearCurRect;
+            document.getElementById('clearCanvas').onclick = events.clearCanvas;
+            document.getElementById('clearRect').onclick = events.clearRect;
+            document.getElementById('getRectInfo').onclick = events.getRectInfo;
+            document.getElementById('getSelectInfo').onclick = events.getSelectInfo;
+            document.getElementById('setScaleUp').onclick = events.setScaleUp;
+            document.getElementById('setScaleDown').onclick = events.setScaleDown;
+        });
 
     };
 
