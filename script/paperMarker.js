@@ -46,14 +46,14 @@
     PaperMarker.prototype = {
 
         getImage: function (callback) {
-        var _this = this;
-        _this.image.src = _this.imageUrl;
-        _this.image.onload = function () {
-            if(typeof callback === 'function') {
-                callback();
-            }
-        };
-    },
+            var _this = this;
+            _this.image.src = _this.imageUrl;
+            _this.image.onload = function () {
+                if(typeof callback === 'function') {
+                    callback();
+                }
+            };
+        },
 
         getPosition: function (event) {
             var _this = this;
