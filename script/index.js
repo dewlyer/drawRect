@@ -7,13 +7,13 @@
             paperMarker = new window.PaperMarker(canvas, imageUrl),
             events = {};
 
-        events.clearCanvas = function () {
+        events.clearRectList = function () {
             paperMarker.clear();
         };
-        events.clearRect = function () {
+        events.clearRectSelect = function () {
             paperMarker.clearCurRect();
         };
-        events.getRectInfo = function () {
+        events.getRectListInfo = function () {
             var rectList = paperMarker.getAllRect();
             if(rectList.length > 0) {
                 console.log(rectList);
@@ -23,7 +23,7 @@
                 alert('没有可输出的信息');
             }
         };
-        events.getSelectInfo = function () {
+        events.getRectSelectInfo = function () {
             var selectRect = paperMarker.getSelectRect();
             if(selectRect) {
                 var str = 'ID : ' + selectRect.id + '\n';
@@ -38,26 +38,22 @@
                 alert('没有选中的目标');
             }
         };
-        events.setScaleUp = function () {
+        events.setRectScaleUp = function () {
             paperMarker.setCanvasScale(2);
         };
-        events.setScaleDown = function () {
+        events.setRectScaleDown = function () {
             paperMarker.setCanvasScale(0.5);
         };
-        events.clearCurRect = function (ev) {
+        events.clearRectSelectKey = function (ev) {
             if(ev.keyCode === 8 || ev.keyCode === 46) {
                 paperMarker.clearCurRect();
             }
         };
 
         paperMarker.initialize(function () {
-            $('#clearCanvas').click(events.clearCanvas);
-            $('#clearRect').click(events.clearRect);
-            $('#getRectInfo').click(events.getRectInfo);
-            $('#getSelectInfo').click(events.getSelectInfo);
-            $('#setScaleUp').click(events.setScaleUp);
-            $('#setScaleDown').click(events.setScaleDown);
-            $(document).keyup(events.clearCurRect);
+            $.each(events, function (key, val) {
+                key === 'clearRectSelectKey' ? $(document).on('keyup', val) : $('#' + key).on('click', val);
+            });
         });
 
     });
