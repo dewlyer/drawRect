@@ -2,10 +2,13 @@
     'use strict';
     $(document).ready(function () {
 
-        var canvas = document.getElementById('canvas'),
-            imageUrl = document.getElementById('canvasWrap').getAttribute('data-img'),
-            paperMarker = new window.PaperMarker(canvas, imageUrl),
+        var canvas = $('#canvas').get(0),
+            imageUrl = $('#canvasWrap').attr('data-img'),
+            paperMarker = null,
             events = {};
+
+        if(!window.PaperMarker) { return; }
+        paperMarker = new window.PaperMarker(canvas, imageUrl);
 
         events.clearRectList = function () {
             paperMarker.clear();
