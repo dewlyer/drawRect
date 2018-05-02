@@ -1,7 +1,7 @@
-(function (window) {
+(function (window, $) {
     'use strict';
 
-    var PaperMarker = window.PaperMarker = function (canvas, imageUrl) {
+    var PaperMarker = function (canvas, imageUrl, options) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.imageUrl = imageUrl;
@@ -11,36 +11,29 @@
         this.origin = { x: 0, y: 0 };
         this.scaleHandSize = 10;
         this.canvasScale = 1;
-        this.pen = {
-            normal: {
-                color: 'rgb(20, 71, 204)',
+        this.defaults = {
+            line: {
+                color: {
+                    normal: 'rgb(20, 71, 204)',
+                    select: 'rgb(255, 48, 0)',
+                    active: 'rgb(60, 60, 60)'
+                },
+                width: 1,
                 join: 'round',
-                width: 1
+                dash: [5, 3]
             },
-            select: {
-                color: 'rgb(255, 48, 0)',
-                width: 1
+            rect: {
+                color: {
+                    normal: 'rgba(20, 71, 204, 0.25)',
+                    select: 'rgba(255, 48, 0, 0.25)'
+                }
             },
-            active: {
-                dashed: [5, 3],
-                color: 'rgb(60, 60, 60)',
-                width: 1
-            },
-            coordinate: {
-                font: '14px Arial'
-            }
-        };
-        this.bucket = {
-            normal: {
-                color: 'rgba(20, 71, 204, 0.25)'
-            },
-            select: {
-                color: 'rgba(255, 48, 0, 0.25)'
-            },
-            coordinate: {
+            text: {
+                font: '14px Arial',
                 color: 'rgba(255, 255, 255, 0.75)'
             }
         };
+        this.settings = $.extend({}, this.defaults, options);
     };
 
     PaperMarker.prototype = {
@@ -340,10 +333,15 @@
         drawRectCur: function () {
             var _this = this;
             _this.ctx.save();
-            _this.ctx.strokeStyle = _this.pen.active.color;
-            _this.ctx.lineWidth = _this.pen.active.width;
-            _this.ctx.setLineDash(_this.pen.active.dashed);
-            _this.ctx.strokeRect(_this.rect.x * _this.canvasScale, _this.rect.y * _this.canvasScale, _this.rect.width * _this.canvasScale, _this.rect.height * _this.canvasScale);
+            _this.ctx.strokeStyle = _this.settings.line.color.active;
+            _this.ctx.lineWidth = _this.settings.line.width;
+            _this.ctx.setLineDash(_this.settings.line.dash);
+            _this.ctx.strokeRect(
+                _this.rect.x * _this.canvasScale,
+                _this.rect.y * _this.canvasScale,
+                _this.rect.width * _this.canvasScale,
+                _this.rect.height * _this.canvasScale
+            );
             _this.ctx.restore();
         },
 
@@ -354,24 +352,26 @@
                 selectIndex = _this.getSelectRectIndex();
             }
             _this.ctx.save();
-            _this.ctx.lineJoin = _this.pen.normal.join;
-            _this.ctx.lineWidth = _this.pen.normal.width;
-            _this.ctx.strokeStyle = _this.pen.normal.color;
-            _this.ctx.fillStyle = _this.bucket.normal.color;
+            _this.ctx.lineJoin = _this.settings.line.join;
+            _this.ctx.lineWidth = _this.settings.line.width;
+            _this.ctx.strokeStyle = _this.settings.line.color.normal;
+            _this.ctx.fillStyle = _this.settings.rect.color.normal;
 
             _this.marks.forEach(function (item, index) {
                 if(selectIndex === index) {
                     _this.ctx.save();
-                    _this.ctx.strokeStyle = _this.pen.select.color;
-                    _this.ctx.lineWidth = _this.pen.select.width;
-                    _this.ctx.fillStyle = _this.bucket.select.color;
+                    _this.ctx.strokeStyle = _this.settings.line.color.select;
+                    _this.ctx.fillStyle = _this.settings.rect.color.select;
+                    _this.ctx.lineWidth = _this.settings.line.width;
                     _this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
                     _this.ctx.shadowOffsetX = 0;
                     _this.ctx.shadowOffsetY = 2;
                     _this.ctx.shadowBlur = 3;
                 }
-                _this.ctx.fillRect(item.x * _this.canvasScale, item.y * _this.canvasScale, item.width * _this.canvasScale, item.height * _this.canvasScale);
-                _this.ctx.strokeRect(item.x * _this.canvasScale, item.y * _this.canvasScale, item.width * _this.canvasScale, item.height * _this.canvasScale);
+                _this.ctx.fillRect(item.x * _this.canvasScale, item.y * _this.canvasScale,
+                    item.width * _this.canvasScale, item.height * _this.canvasScale);
+                _this.ctx.strokeRect(item.x * _this.canvasScale, item.y * _this.canvasScale,
+                    item.width * _this.canvasScale, item.height * _this.canvasScale);
                 if(selectIndex === index) {
                     _this.ctx.restore();
                 }
@@ -389,10 +389,11 @@
                 ' - W:' + item.width + ' / H:' + item.height;
 
             _this.ctx.save();
-            _this.ctx.font = _this.pen.coordinate.font;
-            _this.ctx.fillStyle = _this.bucket.coordinate.color;
-            _this.ctx.fillRect(item.x * _this.canvasScale -1, item.y * _this.canvasScale-1, _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.pen.coordinate.font) + verOffset));
-            _this.ctx.fillStyle = (selected && selectIndex === index) ? _this.pen.select.color : _this.pen.normal.color;
+            _this.ctx.font = _this.settings.text.font;
+            _this.ctx.fillStyle = _this.settings.text.color;
+            _this.ctx.fillRect(item.x * _this.canvasScale -1, item.y * _this.canvasScale-1,
+                _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.defaults.text.font) + verOffset));
+            _this.ctx.fillStyle = (selected && selectIndex === index) ? _this.defaults.line.color.select : _this.defaults.line.color.normal;
             _this.ctx.fillText(str, item.x * _this.canvasScale, item.y * _this.canvasScale - verOffset);
             _this.ctx.restore();
         },
@@ -551,4 +552,6 @@
         }
     };
 
-})(window);
+    $.PaperMarker = PaperMarker;
+
+})(window, jQuery);
