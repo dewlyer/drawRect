@@ -392,8 +392,8 @@
             _this.ctx.font = _this.settings.text.font;
             _this.ctx.fillStyle = _this.settings.text.color;
             _this.ctx.fillRect(item.x * _this.canvasScale -1, item.y * _this.canvasScale-1,
-                _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.defaults.text.font) + verOffset));
-            _this.ctx.fillStyle = (selected && selectIndex === index) ? _this.defaults.line.color.select : _this.defaults.line.color.normal;
+                _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.settings.text.font) + verOffset));
+            _this.ctx.fillStyle = (selected && selectIndex === index) ? _this.settings.line.color.select : _this.settings.line.color.normal;
             _this.ctx.fillText(str, item.x * _this.canvasScale, item.y * _this.canvasScale - verOffset);
             _this.ctx.restore();
         },
