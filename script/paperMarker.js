@@ -319,7 +319,7 @@
         setCanvasScale: function (scale) {
             var _this = this;
             _this.canvasScale *= scale;
-            _this.reDraw();
+            _this.redraw();
         },
 
         drawImage: function () {
@@ -398,7 +398,7 @@
             _this.ctx.restore();
         },
 
-        reDraw: function (selected) {
+        redraw: function (selected) {
             var _this = this;
             _this.clearCanvas();
             _this.drawImage();
@@ -421,7 +421,7 @@
 
             if(index !== null) {
                 _this.marks.splice(index, 1);
-                _this.reDraw();
+                _this.redraw();
             }
         },
 
@@ -444,7 +444,7 @@
             var _this = this;
             if(_this.cursorEvent === 'none') {
                 _this.clearMarks();
-                _this.reDraw();
+                _this.redraw();
             }
         },
 
@@ -461,7 +461,7 @@
                             _this.setSelectRect(action.index);
                             _this.setRectSort(action.index);
                             selectIndex = _this.getSelectRectIndex();
-                            _this.reDraw(true);
+                            _this.redraw(true);
                             _this.canvas.onmousemove = handler.selectMove;
                             _this.canvas.onmouseup = handler.selectUp;
                         }
@@ -487,7 +487,7 @@
                     },
                     mouseMove: function (e) {
                         _this.getRect(e);
-                        _this.reDraw();
+                        _this.redraw();
                         _this.drawRectCur();
                     },
                     mouseUp: function (e) {
@@ -498,7 +498,7 @@
                         }, function () {
                             // alert('所选区域太小，请重现选取！');
                         });
-                        _this.reDraw();
+                        _this.redraw();
                         _this.canvas.onmousemove = null;
                         _this.canvas.onmouseup = null;
                     },
@@ -509,13 +509,13 @@
                     selectMove: function (e) {
                         // selectIndex = _this.getSelectRectIndex();
                         _this.setRectOffset(e, selectIndex);
-                        _this.reDraw(true);
+                        _this.redraw(true);
                     },
                     selectUp: function (e) {
                         if(e.button !== 0) return;
                         // selectIndex = _this.getSelectRectIndex();
                         _this.setRectOffset(e, selectIndex);
-                        _this.reDraw(true);
+                        _this.redraw(true);
                         _this.canvas.onmousemove = handler.activeMove;
                         _this.canvas.onmouseup = null;
                         _this.cursorEvent = 'none';
@@ -523,11 +523,11 @@
                     scaleMove: function (e, direction) {
                         // selectIndex = _this.getSelectRectIndex();
                         _this.setRectSize(e, selectIndex, direction);
-                        _this.reDraw(true);
+                        _this.redraw(true);
                     },
                     scaleUp: function (e) {
                         if(e.button !== 0) return;
-                        _this.reDraw(true);
+                        _this.redraw(true);
                         _this.canvas.onmousemove = handler.activeMove;
                         _this.canvas.onmouseup = null;
                         _this.cursorEvent = 'none';
