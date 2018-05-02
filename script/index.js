@@ -1,5 +1,6 @@
 (function (window, document, $) {
     'use strict';
+
     $(document).ready(function () {
 
         var canvas = $('#canvas').get(0),
@@ -7,8 +8,9 @@
             paperMarker = null,
             events = {};
 
-        if(!window.PaperMarker) { return; }
-        paperMarker = new window.PaperMarker(canvas, imageUrl);
+        if(!$.PaperMarker) return;
+
+        paperMarker = new $.PaperMarker(canvas, imageUrl);
 
         events.clearRectList = function () {
             paperMarker.clear();
@@ -60,4 +62,5 @@
         });
 
     });
+
 })(window, document, jQuery);
