@@ -1,8 +1,92 @@
-(function (window, $) {
-    'use strict';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit">
+<title>Canvas Draw Rect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
 
-    $.PaperMarker.prototype = {
+        .canvas-wrap {
 
+        }
+        .canvas-buts {
+            position: fixed;
+            z-index: 10;
+            right: 0;
+            top: 0;
+        }
+        .canvas-button {
+            margin-right: 10px;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #666;
+            color: #fff;
+        }
+        .canvas {
+
+        }
+    </style>
+</head>
+<body>
+<div id="canvasWrap" class="canvas-wrap" data-img="images/bg.jpg">
+    <canvas class="canvas" id="canvas" width="300" height="300">
+        当前浏览器不支持 Canvas
+    </canvas>
+    <div class="canvas-buts">
+        <div><button type="button" class="canvas-button" id="clearRectList">全部清除</button></div>
+        <div><button type="button" class="canvas-button" id="clearRectSelect">删除选中</button></div>
+        <div><button type="button" class="canvas-button" id="getRectListInfo">全部信息</button></div>
+        <div><button type="button" class="canvas-button" id="getRectSelectInfo">选中信息</button></div>
+        <div><button type="button" class="canvas-button" id="setRectScaleUp">放大一倍</button></div>
+        <div><button type="button" class="canvas-button" id="setRectScaleDown">缩小一倍</button></div>
+    </div>
+</div>
+<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+<script>
+    function PaperMarker (canvas, imageUrl, options) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.imageUrl = imageUrl;
+        this.image = new Image();
+        this.rect = {};
+        this.marks = [];
+        this.targets = [];
+        this.origin = { x: 0, y: 0 };
+        this.scaleHandSize = 10;
+        this.canvasScale = 1;
+
+        this.defaults = {
+            line: {
+                color: {
+                    normal: 'rgb(20, 71, 204)',
+                    select: 'rgb(255, 48, 0)',
+                    active: 'rgb(60, 60, 60)'
+                },
+                width: 1,
+                join: 'round',
+                dash: [5, 3]
+            },
+            rect: {
+                color: {
+                    normal: 'rgba(20, 71, 204, 0.25)',
+                    select: 'rgba(255, 48, 0, 0.25)'
+                }
+            },
+            text: {
+                font: '14px Arial',
+                color: 'rgba(0, 0, 0, 0.75)',
+                bgcolor: 'rgba(255, 255, 255, 0.75)'
+            }
+        };
+        this.settings = $.extend({}, this.defaults, options);
+    }
+
+    PaperMarker.prototype = {
         getImage: function (callback) {
             var _this = this;
             _this.image.src = _this.imageUrl;
@@ -53,6 +137,31 @@
             var index = _this.getSelectRectIndex();
             if(index !== null) {
                 return _this.marks[index];
+            }
+        },
+
+        getTargetRect: function () {
+            var _this = this;
+            return _this.targets;
+        },
+
+        setTargetRectId: function (index) {
+            var _this = this;
+            var selectedRect = _this.marks[index];
+            var selected = false;
+            var selecteIndex = null;
+
+            $.each(_this.targets, function (index, item) {
+                if(selectedRect.id === item.id) {
+                    selected = true;
+                    selecteIndex = index;
+                }
+            });
+            if(!selected) {
+                _this.targets.push(selectedRect);
+            }
+            else {
+                _this.targets.splice(selecteIndex, 1);
             }
         },
 
@@ -168,6 +277,13 @@
                 height: _this.rect.height,
                 id: _this.rect.id
             });
+        },
+
+        customLastRect: function (obj) {
+            var _this = this;
+            var lastIndex = _this.marks.length - 1;
+            if(typeof _this.marks[lastIndex] !== 'object' || typeof obj === 'undefined') return;
+            _this.marks[lastIndex].custom = obj;
         },
 
         setSelectRect: function (index) {
@@ -323,24 +439,37 @@
             _this.ctx.fillStyle = _this.settings.rect.color.normal;
 
             _this.marks.forEach(function (item, index) {
-                if(selectIndex === index) {
+                // if(selectIndex === index) {
+                //     _this.ctx.save();
+                //     _this.ctx.strokeStyle = _this.settings.line.color.select;
+                //     _this.ctx.fillStyle = _this.settings.rect.color.select;
+                //     _this.ctx.lineWidth = _this.settings.line.width;
+                //     _this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                //     _this.ctx.shadowOffsetX = 0;
+                //     _this.ctx.shadowOffsetY = 2;
+                //     _this.ctx.shadowBlur = 3;
+                // }
+                var hasItem = false;
+                _this.targets.forEach(function (it, i) {
+                    if(item.id === it.id) {
+                        hasItem = true;
+                    }
+                });
+                if(hasItem) {
                     _this.ctx.save();
                     _this.ctx.strokeStyle = _this.settings.line.color.select;
                     _this.ctx.fillStyle = _this.settings.rect.color.select;
                     _this.ctx.lineWidth = _this.settings.line.width;
-                    _this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-                    _this.ctx.shadowOffsetX = 0;
-                    _this.ctx.shadowOffsetY = 2;
-                    _this.ctx.shadowBlur = 3;
                 }
-                _this.ctx.fillRect(item.x * _this.canvasScale, item.y * _this.canvasScale,
-                    item.width * _this.canvasScale, item.height * _this.canvasScale);
+                //_this.ctx.fillRect(item.x * _this.canvasScale, item.y * _this.canvasScale,
+                //    item.width * _this.canvasScale, item.height * _this.canvasScale);
                 _this.ctx.strokeRect(item.x * _this.canvasScale, item.y * _this.canvasScale,
                     item.width * _this.canvasScale, item.height * _this.canvasScale);
-                if(selectIndex === index) {
+                if(hasItem) {
                     _this.ctx.restore();
                 }
-                _this.drawCoordinate(item, index, selected, selectIndex);
+                // _this.drawCoordinate(item, index, selected, selectIndex);
+                _this.drawCoordinate(item, index, selected, false);
             });
 
             _this.ctx.restore();
@@ -355,10 +484,10 @@
 
             _this.ctx.save();
             _this.ctx.font = _this.settings.text.font;
-            _this.ctx.fillStyle = _this.settings.text.color;
+            _this.ctx.fillStyle = _this.settings.text.bgcolor;
             _this.ctx.fillRect(item.x * _this.canvasScale -1, item.y * _this.canvasScale-1,
                 _this.ctx.measureText(str).width + horOffset, -(parseInt(_this.settings.text.font) + verOffset));
-            _this.ctx.fillStyle = (selected && selectIndex === index) ? _this.settings.line.color.select : _this.settings.line.color.normal;
+            _this.ctx.fillStyle = (selected && selectIndex === index) ? _this.settings.line.color.select : _this.settings.text.color;
             _this.ctx.fillText(str, item.x * _this.canvasScale, item.y * _this.canvasScale - verOffset);
             _this.ctx.restore();
         },
@@ -423,6 +552,7 @@
                         if(action.name === 'move') {
                             _this.cursorEvent = 'move';
                             _this.canvas.style = 'cursor: move;';
+                            _this.setTargetRectId(action.index);
                             _this.setSelectRect(action.index);
                             _this.setRectSort(action.index);
                             selectIndex = _this.getSelectRectIndex();
@@ -460,6 +590,9 @@
                         _this.canAppendRect(e, function () {
                             _this.getRect(e);
                             _this.setRect();
+                            if(typeof _this.settings.events.afterAppend === 'function'){
+                                _this.settings.events.afterAppend();
+                            }
                         }, function () {
                             // alert('所选区域太小，请重现选取！');
                         });
@@ -516,5 +649,95 @@
             });
         }
     };
+</script>
+<script>
+    $(document).ready(function () {
 
-})(window, jQuery);
+        var canvas = $('#canvas').get(0),
+            imageUrl = $('#canvasWrap').attr('data-img'),
+            // imageUrl = bg,
+            paperMarker = null,
+            events = {};
+
+        if(!PaperMarker) return;
+
+        paperMarker = new PaperMarker(canvas, imageUrl, {
+            events: {
+                afterAppend :function () {
+                    // console.log(this)
+                    var number = parseInt(Math.random() * 100);
+                    var points = window.prompt('OK');
+                    paperMarker.customLastRect({
+                        number : number,
+                        points : points
+                    });
+                }
+            }
+        });
+
+        events.clearRectList = function () {
+            paperMarker.clear();
+        };
+        events.clearRectSelect = function () {
+            paperMarker.clearCurRect();
+        };
+        events.getRectListInfo = function () {
+            var rectList = paperMarker.getAllRect();
+            if(rectList.length > 0) {
+                alert(JSON.stringify(rectList));
+            }
+            else {
+                alert('没有可输出的信息');
+            }
+        };
+        events.getRectSelectInfo = function () {
+            // var selectRect = paperMarker.getSelectRect();
+            // if(selectRect) {
+            //     var str = 'ID : ' + selectRect.id + '\n';
+            //     str += 'X : ' + selectRect.x + '\n';
+            //     str += 'Y : ' + selectRect.y + '\n';
+            //     str += 'Width : ' + selectRect.width + '\n';
+            //     str += 'Height :' + selectRect.height;
+            //     alert(str);
+            //     console.log(selectRect);
+            // }
+            // else {
+            //     alert('没有选中的目标');
+            // }
+
+            var targetRect = paperMarker.getTargetRect();
+            if(targetRect) {
+                var scroe = 0;
+                targetRect.forEach(function (item, index) {
+                    if(typeof item.custom !== 'undefined' && typeof item.custom.points !== 'undefined') {
+                        var p = parseFloat(item.custom.points);
+                        if(!isNaN(p)) {
+                            scroe += p;
+                        }
+                    }
+                });
+                alert(scroe);
+            }
+        };
+        events.setRectScaleUp = function () {
+            paperMarker.setCanvasScale(2);
+        };
+        events.setRectScaleDown = function () {
+            paperMarker.setCanvasScale(0.5);
+        };
+        events.clearRectSelectKey = function (ev) {
+            if(ev.keyCode === 8 || ev.keyCode === 46) {
+                paperMarker.clearCurRect();
+            }
+        };
+
+        paperMarker.initialize(function () {
+            $.each(events, function (key, val) {
+                key === 'clearRectSelectKey' ? $(document).on('keyup', val) : $('#' + key).on('click', val);
+            });
+        });
+
+    });
+</script>
+</body>
+</html>
