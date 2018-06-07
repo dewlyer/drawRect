@@ -63,7 +63,7 @@
         this.defaults = {
             line: {
                 color: {
-                    normal: 'rgb(20, 71, 204)',
+                    normal: 'rgb(22, 195, 27)',
                     select: 'rgb(255, 48, 0)',
                     active: 'rgb(60, 60, 60)'
                 },
@@ -73,17 +73,27 @@
             },
             rect: {
                 color: {
-                    normal: 'rgba(20, 71, 204, 0.25)',
+                    normal: 'rgba(22, 195, 27, 0.25)',
                     select: 'rgba(255, 48, 0, 0.25)'
                 }
             },
             text: {
-                font: '14px Arial',
+                font: '15px Arial',
                 color: 'rgba(0, 0, 0, 0.75)',
                 bgcolor: 'rgba(255, 255, 255, 0.75)'
+            },
+            check: {
+                icon: {
+                    offsetX: 24,
+                    offsetY: 3,
+                    positive: '\u2611',
+                    negative: '\u2612',
+                    font: '30px Arial'
+                },
+                mode: 'positive'
             }
         };
-        this.settings = $.extend({}, this.defaults, options);
+        this.settings = $.extend(true, {}, this.defaults, options);
     }
 
     PaperMarker.prototype = {
@@ -437,6 +447,7 @@
             _this.ctx.lineWidth = _this.settings.line.width;
             _this.ctx.strokeStyle = _this.settings.line.color.normal;
             _this.ctx.fillStyle = _this.settings.rect.color.normal;
+            _this.ctx.setLineDash(_this.settings.line.dash);
 
             _this.marks.forEach(function (item, index) {
                 // if(selectIndex === index) {
@@ -460,6 +471,8 @@
                     _this.ctx.strokeStyle = _this.settings.line.color.select;
                     _this.ctx.fillStyle = _this.settings.rect.color.select;
                     _this.ctx.lineWidth = _this.settings.line.width;
+                    _this.ctx.setLineDash([]);
+                    _this.drawCheckIcon(item);
                 }
                 //_this.ctx.fillRect(item.x * _this.canvasScale, item.y * _this.canvasScale,
                 //    item.width * _this.canvasScale, item.height * _this.canvasScale);
@@ -475,12 +488,28 @@
             _this.ctx.restore();
         },
 
+        drawCheckIcon: function (item) {
+            var _this = this;
+            _this.ctx.font = _this.settings.check.icon.font;
+            _this.ctx.fillStyle = _this.settings.line.color.select;
+            _this.ctx.fillText(_this.settings.check.icon[_this.settings.check.mode], (item.x + item.width) * _this.canvasScale -  _this.settings.check.icon.offsetX, (item.y + item.height) * _this.canvasScale -  _this.settings.check.icon.offsetY)
+        },
+
         drawCoordinate: function (item, index, selected, selectIndex) {
             var _this = this;
             var verOffset = 4;
             var horOffset = 4;
-            var str = 'ID:' + item.id + ' - X:' + item.x + ' / Y:' + item.y + ' / Z:' + index +
-                ' - W:' + item.width + ' / H:' + item.height;
+            var str = '';
+
+            if(item.custom && item.custom.points) {
+                str = '分数:' + item.custom.points + ' / ';
+            }
+            str += '层级:' + index;
+            // ' - X:' + item.x
+            // ' / Y:' + item.y
+            // ' / Z:' + index
+            // ' - W:' + item.width
+            // ' / H:' + item.height
 
             _this.ctx.save();
             _this.ctx.font = _this.settings.text.font;
@@ -574,10 +603,10 @@
                             // append rect
                             _this.cursorEvent = 'none';
                             _this.canvas.style = 'cursor: default;';
-                            _this.setOriginPoint(e);
-                            _this.clearSelectRect();
-                            _this.canvas.onmousemove = handler.mouseMove;
-                            _this.canvas.onmouseup = handler.mouseUp;
+                            // _this.setOriginPoint(e);
+                            // _this.clearSelectRect();
+                            // _this.canvas.onmousemove = handler.mouseMove;
+                            // _this.canvas.onmouseup = handler.mouseUp;
                         }
                     },
                     mouseMove: function (e) {
@@ -646,11 +675,19 @@
                 else {
                     alert('图片加载错误');
                 }
+
+                if(_this.settings.data && _this.settings.data.length > 0) {
+                    _this.marks = _this.settings.data;
+                    _this.redraw();
+                }
             });
         }
     };
 </script>
 <script>
+    var rectData = [{"x":606,"y":128,"width":157,"height":133,"id":0,"custom":{"number":19,"points":"1"}},{"x":608,"y":287,"width":159,"height":117,"id":1,"custom":{"number":3,"points":"2"}},{"x":608,"y":417,"width":159,"height":141,"id":2,"custom":{"number":40,"points":"3"}},{"x":602,"y":574,"width":170,"height":121,"id":3,"custom":{"number":86,"points":"4"}},{"x":597,"y":706,"width":178,"height":149,"id":4,"custom":{"number":28,"points":"5"}}];
+    var rectMode = 'positive'; //'negative';
+
     $(document).ready(function () {
 
         var canvas = $('#canvas').get(0),
@@ -672,7 +709,11 @@
                         points : points
                     });
                 }
-            }
+            },
+            check: {
+                mode: rectMode
+            },
+            data: rectData
         });
 
         events.clearRectList = function () {

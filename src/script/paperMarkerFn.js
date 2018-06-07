@@ -1,7 +1,7 @@
 export default {
 
     getImage: function (callback) {
-        var _this = this;
+        let _this = this;
         _this.image.src = _this.imageUrl;
         _this.image.onload = function () {
             if(typeof callback === 'function') {
@@ -11,7 +11,7 @@ export default {
     },
 
     getPosition: function (event) {
-        var _this = this;
+        let _this = this;
         return {
             x: (event.x + window.scrollX) / _this.canvasScale,
             y: (event.y + window.scrollY) / _this.canvasScale
@@ -19,7 +19,7 @@ export default {
     },
 
     getRectIndexById: function (id) {
-        var _this = this,
+        let _this = this,
             index = null;
 
         _this.marks.every(function (item, i) {
@@ -36,7 +36,7 @@ export default {
     },
 
     getSelectRectIndex: function () {
-        var _this = this;
+        let _this = this;
         if((typeof _this.selectedRect !== 'undefined') && (typeof _this.selectedRect.id !== 'undefined')) {
             return _this.getRectIndexById(_this.selectedRect.id);
         }
@@ -46,16 +46,16 @@ export default {
     },
 
     getSelectRect: function () {
-        var _this = this;
-        var index = _this.getSelectRectIndex();
+        let _this = this;
+        let index = _this.getSelectRectIndex();
         if(index !== null) {
             return _this.marks[index];
         }
     },
 
     getRect: function (event) {
-        var _this = this;
-        var point = _this.getPosition(event);
+        let _this = this;
+        let point = _this.getPosition(event);
 
         if(point.x >= _this.origin.x) {
             _this.rect.x = _this.origin.x;
@@ -78,19 +78,19 @@ export default {
     },
 
     getAllRect: function () {
-        var _this = this;
+        let _this = this;
         return _this.marks;
     },
 
     getMouseAction: function (event) {
-        var _this = this;
-        var action = { name: 'append', index: 0, direction: '' };
-        var point = _this.getPosition(event);
-        var itemIndex = _this.getSelectRectIndex();
+        let _this = this;
+        let action = { name: 'append', index: 0, direction: '' };
+        let point = _this.getPosition(event);
+        let itemIndex = _this.getSelectRectIndex();
 
         if(_this.marks.length > 0) {
             _this.marks.forEach(function (item, index) {
-                var x1 = item.x, x2 = item.x + item.width,
+                let x1 = item.x, x2 = item.x + item.width,
                     y1 = item.y, y2 = item.y + item.height;
                 if(point.x >= x1 && point.x <= x2 && point.y >= y1 && point.y <= y2) {
                     action.index = index;
@@ -139,10 +139,10 @@ export default {
     },
 
     canAppendRect: function (event, success, failure) {
-        var _this = this;
-        var point = _this.getPosition(event);
-        var width = Math.abs(point.x - _this.origin.x);
-        var height = Math.abs(point.y - _this.origin.y);
+        let _this = this;
+        let point = _this.getPosition(event);
+        let width = Math.abs(point.x - _this.origin.x);
+        let height = Math.abs(point.y - _this.origin.y);
         if(width > 2*_this.scaleHandSize && height > 2*_this.scaleHandSize) {
             (typeof success === 'function') && success();
         }
@@ -152,12 +152,12 @@ export default {
     },
 
     setOriginPoint: function (event) {
-        var _this = this;
+        let _this = this;
         _this.origin = _this.getPosition(event);
     },
 
     setRect: function () {
-        var _this = this;
+        let _this = this;
         _this.marks.push({
             x: _this.rect.x,
             y: _this.rect.y,
@@ -168,8 +168,8 @@ export default {
     },
 
     setSelectRect: function (index) {
-        var _this = this;
-        var selectItem = _this.marks[index];
+        let _this = this;
+        let selectItem = _this.marks[index];
         _this.selectedOrigin = _this.getPosition(event);
         _this.selectedRect = {
             id: selectItem.id,
@@ -181,19 +181,19 @@ export default {
     },
 
     setRectSort: function (index) {
-        var _this = this;
-        var selectedRect = _this.marks[index];
+        let _this = this;
+        let selectedRect = _this.marks[index];
         _this.marks.splice(index, 1);
         _this.marks.push(selectedRect);
     },
 
     setRectSize: function (event, itemIndex, direction) {
-        var _this = this;
-        var point = _this.getPosition(event);
-        var offsetW = point.x - _this.selectedOrigin.x;
-        var offsetH = point.y - _this.selectedOrigin.y;
+        let _this = this;
+        let point = _this.getPosition(event);
+        let offsetW = point.x - _this.selectedOrigin.x;
+        let offsetH = point.y - _this.selectedOrigin.y;
 
-        var ways = direction.split(',');
+        let ways = direction.split(',');
         ways.forEach(function (item) {
             if(item === 'left') {
                 if(offsetW <= 0 || _this.marks[itemIndex].width >= 2*_this.scaleHandSize) {
@@ -221,22 +221,22 @@ export default {
     },
 
     setRectOffset: function (event, itemIndex) {
-        var _this = this;
-        var position = _this.getPosition(event);
-        var offsetX = position.x - _this.selectedOrigin.x;
-        var offsetY = position.y - _this.selectedOrigin.y;
+        let _this = this;
+        let position = _this.getPosition(event);
+        let offsetX = position.x - _this.selectedOrigin.x;
+        let offsetY = position.y - _this.selectedOrigin.y;
         _this.marks[itemIndex].x = _this.selectedRect.x + offsetX;
         _this.marks[itemIndex].y = _this.selectedRect.y + offsetY;
     },
 
     setCursorStyle: function (event, itemIndex) {
-        var _this = this;
+        let _this = this;
         if(_this.marks.length <= 0) { return }
 
-        var point = _this.getPosition(event);
-        var item = _this.marks[itemIndex];
-        var style =  'cursor: move;';
-        var x1 = item.x, x2 = item.x + item.width,
+        let point = _this.getPosition(event);
+        let item = _this.marks[itemIndex];
+        let style =  'cursor: move;';
+        let x1 = item.x, x2 = item.x + item.width,
             y1 = item.y, y2 = item.y + item.height;
 
         if(point.x >= x1 && point.x <= x2 && point.y >= y1 && point.y <= y2) {
@@ -279,13 +279,13 @@ export default {
     },
 
     setCanvasScale: function (scale) {
-        var _this = this;
+        let _this = this;
         _this.canvasScale *= scale;
         _this.redraw();
     },
 
     drawImage: function () {
-        var _this = this;
+        let _this = this;
         _this.ctx.scale(_this.canvasScale, _this.canvasScale);
         _this.canvas.width = (_this.image.naturalWidth || _this.image.width) * _this.canvasScale;
         _this.canvas.height = (_this.image.naturalHeight || _this.image.height) * _this.canvasScale;
@@ -293,7 +293,7 @@ export default {
     },
 
     drawRectCur: function () {
-        var _this = this;
+        let _this = this;
         _this.ctx.save();
         _this.ctx.strokeStyle = _this.settings.line.color.active;
         _this.ctx.lineWidth = _this.settings.line.width;
@@ -308,8 +308,8 @@ export default {
     },
 
     drawRectList: function (selected) {
-        var _this = this;
-        var selectIndex = null;
+        let _this = this;
+        let selectIndex = null;
         if(selected) {
             selectIndex = _this.getSelectRectIndex();
         }
@@ -344,10 +344,10 @@ export default {
     },
 
     drawCoordinate: function (item, index, selected, selectIndex) {
-        var _this = this;
-        var verOffset = 4;
-        var horOffset = 4;
-        var str = 'ID:' + item.id + ' - X:' + item.x + ' / Y:' + item.y + ' / Z:' + index +
+        let _this = this;
+        let verOffset = 4;
+        let horOffset = 4;
+        let str = 'ID:' + item.id + ' - X:' + item.x + ' / Y:' + item.y + ' / Z:' + index +
             ' - W:' + item.width + ' / H:' + item.height;
 
         _this.ctx.save();
@@ -361,24 +361,24 @@ export default {
     },
 
     redraw: function (selected) {
-        var _this = this;
+        let _this = this;
         _this.clearCanvas();
         _this.drawImage();
         _this.drawRectList(selected);
     },
 
     clearCanvas: function () {
-        var _this = this;
+        let _this = this;
         _this.ctx.clearRect(0, 0, _this.canvas.width, _this.canvas.height);
     },
 
     clearMarks: function () {
-        var _this = this;
+        let _this = this;
         _this.marks = [];
     },
 
     clearRect: function (id) {
-        var _this = this,
+        let _this = this,
             index = _this.getRectIndexById(id);
 
         if(index !== null) {
@@ -388,22 +388,22 @@ export default {
     },
 
     clearSelectRect: function () {
-        var _this = this;
+        let _this = this;
         _this.selectedRect = {};
     },
 
     clearCurRect: function () {
-        var _this = this;
-        var itemIndex = _this.getSelectRectIndex();
+        let _this = this;
+        let itemIndex = _this.getSelectRectIndex();
         if(itemIndex !== null && _this.cursorEvent === 'none') {
-            var id = _this.marks[itemIndex].id;
+            let id = _this.marks[itemIndex].id;
             _this.clearRect(id);
             _this.canvas.onmousemove = null;
         }
     },
 
     clear: function () {
-        var _this = this;
+        let _this = this;
         if(_this.cursorEvent === 'none') {
             _this.clearMarks();
             _this.redraw();
@@ -411,12 +411,12 @@ export default {
     },
 
     handleEvent: function () {
-        var _this = this,
+        let _this = this,
             selectIndex = null,
             handler = {
                 mouseDown: function (e) {
                     if(e.button !== 0) return;
-                    var action = _this.getMouseAction(e);
+                    let action = _this.getMouseAction(e);
                     if(action.name === 'move') {
                         _this.cursorEvent = 'move';
                         _this.canvas.style = 'cursor: move;';
@@ -500,7 +500,7 @@ export default {
     },
 
     initialize: function (callback) {
-        var _this = this;
+        let _this = this;
         _this.getImage(function () {
             if(_this.image.src) {
                 _this.drawImage();
