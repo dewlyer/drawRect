@@ -21,10 +21,10 @@ $(document).ready(() => {
             paperMarker.clear();
         },
         clearRectSelect () {
-            paperMarker.clearCurRect();
+            paperMarker.clearCurrentMark();
         },
         getRectListInfo () {
-            let rectList = paperMarker.getAllRect();
+            let rectList = paperMarker.getMarkList();
             if(rectList.length > 0) {
                 console.log(rectList);
                 alert(JSON.stringify(rectList));
@@ -34,7 +34,7 @@ $(document).ready(() => {
             }
         },
         getRectSelectInfo () {
-            let selectRect = paperMarker.getSelectRect();
+            let selectRect = paperMarker.getSelectedMark();
             if(selectRect) {
                 let str = `ID: ${selectRect.id} - X: ${selectRect.x} - Y: ${selectRect.y} - W: ${selectRect.width} - H: ${selectRect.height}`;
                 // let str = 'ID : ' + selectRect.id + '\n';
@@ -79,5 +79,6 @@ $(document).ready(() => {
         }
         // $.each(events, (key, val) => {});
     });
+
 
 });
