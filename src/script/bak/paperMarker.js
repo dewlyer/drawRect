@@ -1,4 +1,4 @@
-import Mark from './Mark';
+import Mark from '../Mark';
 
 class PaperMarker {
     constructor(canvas, imageUrl, options) {

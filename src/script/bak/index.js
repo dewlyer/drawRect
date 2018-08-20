@@ -1,4 +1,4 @@
-import '../style/index.scss';
+import '../../style/app.scss';
 import bg from '../images/bg.jpg';
 import PaperMarker from './paperMarker';
 

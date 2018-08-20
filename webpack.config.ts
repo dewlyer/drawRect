@@ -1,10 +1,12 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-// const Webpack = require('webpack');
+import * as path from 'path';
+import * as webpack from 'webpack';
 
-module.exports = {
+const HtmlWebpackPlugin = require('html-webpack-plugin'),
+    CleanWebpackPlugin = require('clean-webpack-plugin'),
+    ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+const config: webpack.Configuration = {
+    context: path.resolve(__dirname, './'),
     entry: {
         vendors: './src/script/vendors.ts',
         app: './src/script/app.ts'
@@ -13,7 +15,7 @@ module.exports = {
         filename: '[name].bundle.js',
         path: path.resolve(__dirname, 'dist'),
         library: '[name]',
-        libraryTarget: 'commonjs'
+        libraryTarget: 'umd'
     },
     mode: 'development',
     module: {
@@ -39,14 +41,10 @@ module.exports = {
                 test: /\.scss/,
                 use: ExtractTextPlugin.extract({
                     fallback: 'style-loader',
-                    use: [{
-                        loader: 'css-loader'
-                    }, {
-                        loader: 'sass-loader',
-                        options: {
-                            outputStyle: 'compressed'
-                        }
-                    }]
+                    use: [
+                        { loader: 'css-loader' },
+                        { loader: 'sass-loader', options: { outputStyle: 'compressed'} }
+                    ]
                 })
             },
             {
@@ -63,25 +61,38 @@ module.exports = {
             title: 'Output Management',
             template: './src/index.html'
         }),
-        new ExtractTextPlugin('css/index.css'),
+        new ExtractTextPlugin({
+            filename: 'app.min.css',
+            allChunks: true
+        }),
         // new Webpack.ProvidePlugin({
         //     $: 'jquery',
         //     jQuery: 'jquery'
         // })
     ],
-    devtool: 'inline-source-map',
-    devServer: {
-        contentBase: './dist'
-    },
+    devtool: 'source-map',
+    // devServer: {
+    //     contentBase: path.join(__dirname, 'dist'),
+    //     compress: true,
+    //     port: 9000
+    // },
+    target: 'web',
+    // externals: {
+    //     jquery: "jQuery",
+    // },
     optimization: {
         splitChunks: {
             name: 'vendor'
         }
     },
     resolve: {
-        extensions: ['.ts', '.tsx', '.js']
+        modules: [
+            path.resolve(__dirname, "src"),
+            path.resolve(__dirname, "node_modules")
+        ],
+        extensions: ['.ts', '.tsx', '.js', 'json']
     },
-    // externals: {
-    //     jquery: "window.jQuery",
-    // }
+
 };
+
+export default config;
