@@ -3,6 +3,8 @@ import Mark from './Mark';
 export class Marker {
 
     private static defaults = {
+        container: document.documentElement,
+        canvasWidth: 0,
         line: {
             color: {
                 normal: 'rgb(20, 71, 204)',
@@ -225,11 +227,32 @@ export class Marker {
 
         return action;
     }
+    public getCanvasAbsOffset () {
+        let actualLeft = this.canvas.offsetLeft,
+            actualTop = this.canvas.offsetTop,
+            current = this.canvas.offsetParent; // 取得元素的offsetParent
+
+        // 一直循环直到根元素
+        while (current !== null) {
+            actualLeft += current.offsetLeft;
+            actualTop += current.offsetTop;
+            current = current.offsetParent;
+        }
+
+        // 返回包含left、top坐标的对象
+        return {
+            left: actualLeft,
+            top: actualTop
+        };
+    }
     public getEventPosition (event: MouseEvent) {
         let scale = this.canvasScale;
+        let canvasAbsOffset = this.getCanvasAbsOffset();
+        let scrollContainer = this.settings.container;
+
         return {
-            x: (event.x + window.scrollX) / scale,
-            y: (event.y + window.scrollY) / scale
+            x: ((event.x + scrollContainer.scrollLeft) - canvasAbsOffset.left) / scale,
+            y: ((event.y + scrollContainer.scrollTop) - canvasAbsOffset.top) / scale
         };
     }
     public canAppendMark (event: MouseEvent, success: Function, failure: Function) {
@@ -557,5 +580,16 @@ export class Marker {
         this.image = new Image();
         this.ctx = this.canvas.getContext('2d');
         this.markList = [];
+
+        let manualScale = null;
+        if(this.settings.canvasWidth && this.image.length) {
+            manualScale = this.settings.canvasWidth / (this.image[0].naturalWidth || this.image[0].width);
+            this.canvasScale = manualScale;
+        }
+
+        if(this.settings.data && this.settings.data.length > 0) {
+            this.markList = this.settings.data;
+            this.redraw();
+        }
     }
 }
