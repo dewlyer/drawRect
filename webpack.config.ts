@@ -64,7 +64,7 @@ const config: webpack.Configuration = {
         new ExtractTextPlugin({
             filename: 'app.min.css',
             allChunks: true
-        }),
+        })
         // new Webpack.ProvidePlugin({
         //     $: 'jquery',
         //     jQuery: 'jquery'
